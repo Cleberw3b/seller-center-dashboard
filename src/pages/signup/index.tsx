@@ -85,12 +85,6 @@ const SignUp: React.FC = () => {
         setSuccessfull(true);
         setTitle('Cadastro realizado com sucesso!');
         setMessage('Cheque seu e-mail para autenticar sua conta.');
-
-        setTimeout(() => {
-          router.push('/');
-        }, 3000);
-
-        // history.push('/');
       } catch (err) {
         if (err instanceof Yup.ValidationError) {
           const errors = getValidationErrors(err);
@@ -120,6 +114,7 @@ const SignUp: React.FC = () => {
     if (successfull)
       router.push('/');
   }, [isModalVisible, successfull])
+
 
   const handleAvatarChange = useCallback(
     (e: ChangeEvent<HTMLInputElement>) => {
