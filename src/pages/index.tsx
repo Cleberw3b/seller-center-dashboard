@@ -120,6 +120,15 @@ const SignIn: React.FC = () => {
               <a>Esqueci minha senha</a>
             </Link>
 
+            <Button type="submit" className={styles.buttonStyle}>
+              {
+                !isLoading ?
+                  <span>Entrar</span>
+                  :
+                  <div className={styles.dotFlashing} />
+              }
+            </Button>
+
             {/* <Link to="/forgot-password">Esqueci minha senha</Link> */}
           </Form>
 
