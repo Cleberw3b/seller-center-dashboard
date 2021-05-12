@@ -1,3 +1,5 @@
+@import '../../../../public/styles/__dimensions.scss';
+
 @keyframes appear {
   0% {
      opacity: 0;
@@ -8,20 +10,33 @@
  }
 
 .container{
-  height: 100%;
+  height: calc(100vh - 6rem);
+
+  @media screen and (min-width: $desktop-small-size) {
+    height: calc(100vh - 5rem);
+  }
+
 
   display: flex;
   flex-direction: column;
+
+  overflow: auto;
 
   padding: 2rem;
   padding-left: 2.5rem;
 
   .header {
-    display: flex;
-    flex-direction: row;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr 1fr .5fr;
+    column-gap: 1rem;
 
-    button + button {
-      margin-left: 2rem;
+    @media screen and (min-width: $desktop-size) {
+      display: flex;
+      flex-direction: row;
+
+      button + button {
+        margin-left: 2rem;
+      }
     }
   }
 
