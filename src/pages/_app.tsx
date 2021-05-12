@@ -8,7 +8,7 @@ import { AuthProvider } from '../hooks/auth';
 import Layout from '../components/Screen'
 import SignUp from './signup';
 import SignIn from './index';
-import Verify from './verify';
+import Verify from './verify/[token]';
 
 function MyApp({ Component, pageProps }: AppProps) {
 

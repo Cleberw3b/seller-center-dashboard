@@ -1,20 +1,29 @@
-.dashboardContainer {
-  padding: 1rem;
+@import '../../../public/styles/_dimensions';
 
-  height: 100%;
+.dashboardContainer {
+  width: 100%;
+  height: calc(100vh - 6rem);
+
+  @media screen and (min-width: $desktop-small-size) {
+    height: calc(100vh - 5rem);
+  }
+
+  padding: 1rem;
 
   overflow: auto;
 }
 
 .dashboardContent {
-  width: 100%;
+  flex: 1;
 
-  display: grid;
-  grid-template-rows: auto;
-  grid-template-columns: 1fr 1fr;
-  grid-template-areas:
-    'panel1 panel2'
-    'panel3 panel4';
+  display: flex;
+  flex-direction: column;
+  row-gap: 1rem;
+
+  @media screen and (min-width: $desktop-size) {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
 }
 
 .panelShortcuts {

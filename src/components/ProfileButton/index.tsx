@@ -16,7 +16,7 @@ export const ProfileButton: React.FC = () => {
     <div className={styles.profileContainer}>
       <div className={styles.info}>
         {user ? <span> Olá, {user.name} </span> : <span> Usuário não encontrado </span>}
-        {user ? <img src={user.avatar_url} alt={user.name} /> : <FiUser size={52} color='var(--grafite)' />}
+        {user ? <img src={!user.avatar_url ? 'https://www.projetodraft.com/wp-content/uploads/2019/06/ozllo_logo.jpg' : user.avatar_url} alt={user.name} /> : <FiUser size={52} color='var(--grafite)' />}
       </div>
       <div className={styles.profileContent}>
         <div className={styles.divider} />

@@ -1,8 +1,15 @@
 import React, { createContext, useCallback, useState, useContext, useMemo } from 'react';
 import api from '../services/api';
-import dotenv from 'dotenv';
+import jwt_decode from "jwt-decode";
 
-interface User {
+interface ApiToken {
+  auth: boolean;
+  token: string;
+}
+interface Token {
+  data: User;
+}
+export interface User {
   id: string;
   name: string;
   email: string;
@@ -11,7 +18,7 @@ interface User {
   address?: string,
   birthday?: Date,
   block?: string,
-  category: string,
+  role: string,
   city?: string,
   commission: number,
   complement?: string,
@@ -44,6 +51,7 @@ interface AuthContextData {
   signIn(credentials: SignInCredentials): Promise<void>;
   signOut(): void;
   updateUser(user: User): void;
+  verifyUser(apiToken: ApiToken): boolean;
   isRegisterCompleted: boolean;
 }
 
@@ -67,45 +75,18 @@ const AuthProvider: React.FC = ({ children }) => {
 
   const signIn = useCallback(async ({ email, password }) => {
 
-    if (email === 'admin@ozllo.com' && password === 'admin') {
-      const admin: User = {
-        id: 'admin',
-        name: 'Ozllo',
-        email: 'admin@ozllo.com',
-        avatar_url: 'https://www.projetodraft.com/wp-content/uploads/2019/06/ozllo_logo.jpg',
-        category: '',
-        commission: 0,
-        cpf: '',
-        rg: '',
-        phone: '',
-        store: {
-          cnpj: '',
-        }
-      };
-
-      localStorage.setItem('@SellerCenter:token', 'token');
-      localStorage.setItem('@SellerCenter:user', JSON.stringify(admin));
-
-      api.defaults.headers.authorization = `Bearer ${'token'}`;
-
-      setData({ token: 'token', user: admin });
-
-      return;
-    }
-
     const response = await api.post('auth/login', { login: email, password });
-
-    console.log(`Signin: ${response}`);
 
     //const { token, user } = response.data;
     const { token } = response.data;
+    const decodedToken = jwt_decode(token) as Token;
+
+    const user = decodedToken.data as User;
 
     localStorage.setItem('@SellerCenter:token', token);
-    localStorage.setItem('@SellerCenter:user', JSON.stringify({ email } as User));
+    localStorage.setItem('@SellerCenter:user', JSON.stringify(user));
 
     api.defaults.headers.authorization = `Bearer ${token}`;
-
-    const user = { email } as User;
 
     setData({ token, user });
   }, []);
@@ -132,19 +113,36 @@ const AuthProvider: React.FC = ({ children }) => {
     [setData, data.token, data.user],
   );
 
+  const verifyUser = useCallback((apiToken: ApiToken): boolean => {
+    try {
+      const decodedToken = jwt_decode(apiToken.token) as Token;
+
+      const user = decodedToken.data as User;
+
+      localStorage.setItem('@SellerCenter:token', apiToken.token);
+      localStorage.setItem('@SellerCenter:user', JSON.stringify(user));
+
+      api.defaults.headers.authorization = `Bearer ${apiToken.token}`;
+
+      setData({ token: apiToken.token, user });
+
+      return true;
+    } catch (err) {
+      return false;
+    }
+  }, [])
+
   const isRegisterCompleted = useMemo(() => {
-    return true;
+    if (!!data.user) {
+      //return !!data.user.name && !!data.user.cpf && !!data.user.rg && !!data.user.phone
+    }
 
-    // if (!!data.user) {
-    //   return !!data.user.avatar_url && !!data.user.cpf && !!data.user.rg && !!data.user.phone && !!data.user.category
-    // }
-
-    // return false
+    return true
   }, [data]);
 
   return (
     <AuthContext.Provider
-      value={{ user: data.user, signIn, signOut, updateUser, isRegisterCompleted }}
+      value={{ user: data.user, signIn, signOut, updateUser, verifyUser, isRegisterCompleted }}
     >
       {children}
     </AuthContext.Provider>

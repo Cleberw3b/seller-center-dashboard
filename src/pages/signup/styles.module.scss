@@ -94,7 +94,7 @@
       .formsContainer {
         display: grid;
         grid-template-areas: '. personal .';
-        grid-template-columns: .5fr 1fr .5fr;
+        grid-template-columns: 1fr 1fr 1fr;
         column-gap: 3rem;
 
         h3 {
@@ -142,7 +142,7 @@
     > svg {
       width: 5rem;
       height: 5rem;
-      color: var(--green-100);
+
       margin-bottom: 2rem;
     }
   }
