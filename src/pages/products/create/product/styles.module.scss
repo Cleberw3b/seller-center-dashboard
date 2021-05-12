@@ -13,7 +13,7 @@
   height: calc(100vh - 8rem);
 
   @media screen and (min-width: $desktop-size) {
-    height: calc(100vh - 9rem);
+    height: calc(100vh - 10rem);
   }
 
   // display: flex;
@@ -206,10 +206,17 @@
 .footerContainer {
   // width: 100%;
   // flex: 1;
-  height: 4rem;
+  height: 3rem;
   padding: 0 1rem;
 
   font-size: 1.1rem;
+
+  @media screen and (min-width: $desktop-size) {
+    height: 5rem;
+    padding: 0 2rem;
+
+    font-size: 1.5rem;
+  }
 
   display: flex;
   align-items: center;
@@ -224,12 +231,14 @@
   }
 
   button {
-    font-size: 1rem;
-    padding: .75rem;
+    font-size: .8rem;
+    padding: .5rem;
     margin-left: auto;
 
     @media screen and (min-width: $desktop-size) {
-      font-size: 1.25rem;
+      padding: .75rem;
+
+      font-size: 1.5rem;
     }
   }
 }
