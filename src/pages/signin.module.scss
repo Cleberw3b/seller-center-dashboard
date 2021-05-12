@@ -1,22 +1,79 @@
 @keyframes appearFromLeft {
   0% {
-     opacity: 0;
-     transform: translateX(-20rem);
-   }
-   100% {
-     opacity: 1;
-     transform: translateX(0);
-   }
- }
-
- @keyframes appear {
-   0% {
-      opacity: 0;
-    }
-    100% {
-      opacity: 1;
-    }
+    opacity: 0;
+    transform: translateX(-20rem);
   }
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes appear {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+
+@keyframes flashing {
+  0% {
+    background-color: var(--grafite);
+  }
+  50%,
+  100% {
+    background-color: var(--grey-300);
+  }
+}
+
+.dotFlashing {
+  position: relative;
+
+  top: .3rem;
+  left: 2rem;
+
+  width: .5rem;
+  height: .5rem;
+  border-radius: 50%;
+  background-color: var(--grafite);
+  color: var(--grafite);
+  animation: flashing 1s infinite linear alternate;
+  animation-delay: .5s;
+
+  margin-bottom: .5rem;
+}
+
+.dotFlashing::before, .dotFlashing::after {
+  content: '';
+  display: inline-block;
+  position: absolute;
+  top: 0;
+}
+
+.dotFlashing::before {
+  left: -.75rem;
+  width: .5rem;
+  height: .5rem;
+  border-radius: 50%;
+  background-color: var(--grafite);
+  color: var(--grafite);
+  animation: flashing 1s infinite alternate;
+  animation-delay: 0s;
+}
+
+.dotFlashing::after {
+  left: .75rem;
+  width: .5rem;
+  height: .5rem;
+  border-radius: 50%;
+  background-color: var(--grafite);
+  color: var(--grafite);
+  animation: flashing 1s infinite alternate;
+  animation-delay: 1s;
+}
 
 .container {
   height: 100vh;
@@ -118,8 +175,11 @@
   }
 
   .errorContainer {
+    display: flex;
     align-items: center;
-    margin: 1rem 0;
+    justify-content: center;
+
+    margin-top: 1rem;
     color: var(--red-100);
     text-align: center;
 
@@ -129,9 +189,11 @@
     }
 
     svg {
-      width: 1rem;
-      height: 1rem;
-      margin-right: 0.2rem;
+      align-self: center;
+
+      width: 1.25rem;
+      height: 1.25rem;
+      margin-right: 0.5rem;
     }
   }
 }

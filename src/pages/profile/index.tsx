@@ -20,7 +20,7 @@ type ProfileFormData = {
   address: string,
   birthday: Date,
   block: string,
-  category: string,
+  role: string,
   city: string,
   commission: number,
   complement: string,
@@ -194,14 +194,14 @@ const Profile: React.FC = () => {
           }}
           onSubmit={handleSubmit}
         >
-          <div className={styles.avatarInput}>
+          {/* <div className={styles.avatarInput}>
             {
               !!user ?
                 <AvatarInput avatarUrl={user.avatar_url} userName={user.name} handleAvatarChange={handleAvatarChange} />
                 :
                 <AvatarInput avatarUrl={''} userName={''} handleAvatarChange={handleAvatarChange} />
             }
-          </div>
+          </div> */}
 
           <div className={styles.formsContainer}>
             <div className={styles.personal} style={{ opacity: 1 }}>
@@ -296,7 +296,7 @@ const Profile: React.FC = () => {
               />
 
               <Input
-                name='category'
+                name='role'
                 placeholder='Categoria'
                 autoComplete='off'
               />

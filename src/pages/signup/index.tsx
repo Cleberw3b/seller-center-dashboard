@@ -12,15 +12,15 @@ import getValidationErrors from '../../utils/getValidationErrors';
 
 import styles from './styles.module.scss';
 
+import { isEmailValid, isPasswordSecure } from '../../utils/util';
 import Input from '../../components/InputLabeless';
 import Button from '../../components/PrimaryButton';
 import AvatarInput from '../../components/AvatarInput';
 import Link from 'next/link';
-import { FiCheck, FiChevronLeft } from 'react-icons/fi';
+import { FiCheck, FiChevronLeft, FiX } from 'react-icons/fi';
 import MessageModal from '../../components/MessageModal';
 import { FaExclamation } from 'react-icons/fa';
 import { useRouter } from 'next/router';
-import { TIMEOUT } from 'node:dns';
 
 type SignUpFormData = {
   name: string,
@@ -32,6 +32,8 @@ type SignUpFormData = {
 const SignUp: React.FC = () => {
   const [isModalVisible, setModalVisibility] = useState(false);
   const [successfull, setSuccessfull] = useState(false);
+  const [title, setTitle] = useState<string>();
+  const [message, setMessage] = useState<string>();
   const [userAvatar, setUserAvatar] = useState<string>();
 
   const formRef = useRef<FormHandles>(null);
@@ -48,31 +50,42 @@ const SignUp: React.FC = () => {
         console.log(data)
 
         const schema = Yup.object().shape({
-          name: Yup.string().required('Nome obrigatório'),
+          // name: Yup.string().required('Nome obrigatório'),
           email: Yup.string()
             .required('E-mail obrigatório')
-            .email('Digite um e-mail válido'),
+            .email('Digite um e-mail válido')
+            .test(
+              'email-validation',
+              'Informe um e-mail válido',
+              (value) => (
+                !!value && isEmailValid(value)
+              )),
           password: Yup.string()
-            .min(6, 'No mínimo 6 digitos'),
+            .required('Senha obrigatória')
+            .min(8, 'No mínimo 8 digitos')
+            .test('password-validation',
+              'A senha, além de caracteres minúsculos, deve conter pelo menos um caractere maiúsculo, um número e um caractere especial',
+              (value) => (
+                !!value && isPasswordSecure(value)
+              )),
           password_confirmation: Yup.string()
             .required('Confirme sua senha')
-            .oneOf([Yup.ref('password'), null], 'As senhas devem ser iguais'),
+            .oneOf([Yup.ref('password')], 'A confirmação deve ser igual a senha'),
         });
         await schema.validate(data, { abortEarly: false });
 
         const {
-          name,
           email,
+          password
         } = data;
 
-        const formData = {
-          name,
-          email,
-        };
-
-        // await api.post('/users', data);
+        await api.post('/auth/create', { email, password });
 
         setModalVisibility(true);
+        setSuccessfull(true);
+        setTitle('Cadastro realizado com sucesso!');
+        setMessage('Cheque seu e-mail para autenticar sua conta.');
+
         setTimeout(() => {
           router.push('/');
         }, 10000);
@@ -86,6 +99,10 @@ const SignUp: React.FC = () => {
           return;
         }
 
+        setModalVisibility(true);
+        setSuccessfull(false);
+        setTitle('Oops...');
+        setMessage('Ocorreu um erro durante o cadastro, tente novamente em alguns instantes.');
         // addToast({
         //   type: 'error',
         //   title: 'Erro na atualização',
@@ -100,7 +117,8 @@ const SignUp: React.FC = () => {
   const handleModalVisibility = useCallback(() => {
     setModalVisibility(false);
 
-    router.push('/');
+    if (successfull)
+      router.push('/');
   }, [isModalVisible])
 
   const handleAvatarChange = useCallback(
@@ -112,17 +130,6 @@ const SignUp: React.FC = () => {
 
         !!userAvatar && URL.revokeObjectURL(userAvatar);
         setUserAvatar(URL.createObjectURL(e.target.files[0]));
-
-        console.log(userAvatar)
-
-        // api.patch('/users/avatar', data).then(response => {
-        //   updateUser(response.data);
-
-        //   // addToast({
-        //   //   type: 'success',
-        //   //   title: 'Avatar atualizado!',
-        //   // });
-        // });
       }
     },
     [userAvatar, updateUser],
@@ -153,21 +160,19 @@ const SignUp: React.FC = () => {
           }}
           onSubmit={handleSubmit}
         >
-          <div className={styles.avatarInput}>
-            {
-              <AvatarInput avatarUrl={!!userAvatar ? userAvatar : ''} userName={'Avatar'} handleAvatarChange={handleAvatarChange} />
-            }
-          </div>
+          {/* <div className={styles.avatarInput}>
+            <AvatarInput avatarUrl={!!userAvatar ? userAvatar : ''} userName={'Avatar'} handleAvatarChange={handleAvatarChange} />
+          </div> */}
 
           <div className={styles.formsContainer}>
             <div className={styles.personal}>
               <h3>Sua conta Ozllo</h3>
 
-              <Input
+              {/* <Input
                 name='name'
                 placeholder='Nome'
                 autoComplete='off'
-              />
+              /> */}
 
               <Input
                 name='email'
@@ -198,9 +203,9 @@ const SignUp: React.FC = () => {
         isModalVisible && (
           <MessageModal handleVisibility={handleModalVisibility} alterStyle={successfull}>
             <div className={styles.modalContent}>
-              <FiCheck />
-              <p>Cadastro realizado com sucesso!</p>
-              <p>Cheque seu e-mail para autenticar sua conta.</p>
+              {successfull ? <FiCheck style={{ color: 'var(--green-100)' }} /> : <FiX style={{ color: 'var(--red-100)' }} />}
+              <p>{title}</p>
+              <p>{message}</p>
             </div>
           </MessageModal>
         )

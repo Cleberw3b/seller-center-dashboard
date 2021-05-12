@@ -3,10 +3,10 @@
  *
  * @param ms - milliseconds
  */
-export const sleep = ( ms: number = 1 ) => {
-  return new Promise( ( resolve ) => {
-    setTimeout( resolve, ms )
-  } )
+export const sleep = (ms: number = 1) => {
+  return new Promise((resolve) => {
+    setTimeout(resolve, ms)
+  })
 }
 
 /**
@@ -14,11 +14,11 @@ export const sleep = ( ms: number = 1 ) => {
  *
  * @param depth - Pass depth to get the name of the higher level function
  */
-export const getFunctionName = ( depth: number = 1 ) => {
+export const getFunctionName = (depth: number = 1) => {
   const error = new Error()
-  if ( error.stack ) {
+  if (error.stack) {
     // tslint:disable-next-line:max-line-length
-    return ( ( ( ( error.stack.split( 'at ' ) || [] )[1 + depth] || '' ).match( /(^|\.| <| )(.*[^(<])( \()/ ) || [] )[2] || '' ).split( '.' ).pop()
+    return ((((error.stack.split('at ') || [])[1 + depth] || '').match(/(^|\.| <| )(.*[^(<])( \()/) || [])[2] || '').split('.').pop()
   }
   return 'NULL'
 }
@@ -28,10 +28,10 @@ export const getFunctionName = ( depth: number = 1 ) => {
  * @param timestamp Unix timestamp
  * @returns YYYY-MM-DD format from a timestamp
  */
-export const formatDateFromTimestamp = ( timestamp: number ): string => {
-  const date = new Date( timestamp * 1000 )
+export const formatDateFromTimestamp = (timestamp: number): string => {
+  const date = new Date(timestamp * 1000)
   const year = date.getFullYear()
-  const month = date.getMonth() < 10 ? '0' + ( date.getMonth() + 1 ) : date.getMonth() + 1
+  const month = date.getMonth() < 10 ? '0' + (date.getMonth() + 1) : date.getMonth() + 1
   const day = date.getDay() < 10 ? '0' + date.getDay() : date.getDay()
   return year + '-' + month + '-' + day
 }
@@ -41,12 +41,12 @@ export const formatDateFromTimestamp = ( timestamp: number ): string => {
  * @param isoDate isoDate
  * @returns DD/MM/YYYY format from a ISO string date
  */
-export const formatDateFromIsoFormat = ( isoDate: string ): string => {
+export const formatDateFromIsoFormat = (isoDate: string): string => {
   return isoDate
-    .slice( 0, 10 )
-    .split( '-' )
+    .slice(0, 10)
+    .split('-')
     .reverse()
-    .join( '/' )
+    .join('/')
 }
 
 /**
@@ -54,29 +54,29 @@ export const formatDateFromIsoFormat = ( isoDate: string ): string => {
  * @param isoDate
  * @returns an integer that represents time from an ISO format string date
  */
-export const getIntFromDate = ( isoDate: string ) => {
+export const getIntFromDate = (isoDate: string) => {
   return parseInt(
     isoDate
-      .replace( 'T', '' )
-      .replace( 'Z', '' )
-      .replace( '.', '' )
-      .replace( /:/g, '' )
-      .replace( /-/g, '' )
-    , 10 )
+      .replace('T', '')
+      .replace('Z', '')
+      .replace('.', '')
+      .replace(/:/g, '')
+      .replace(/-/g, '')
+    , 10)
 }
 
-export const throttle = ( func: ( ...args: any ) => any, delay: number ) => {
+export const throttle = (func: (...args: any) => any, delay: number) => {
   let inProgress = false
-  return ( ...args: any ) => {
-    if ( inProgress ) {
+  return (...args: any) => {
+    if (inProgress) {
       return
     }
     inProgress = true
     // Consider moving this line before the set timeout if you want the very first one to be immediate
-    func( ...args )
-    setTimeout( () => {
+    func(...args)
+    setTimeout(() => {
       inProgress = false
-    }, delay )
+    }, delay)
   }
 }
 
@@ -85,8 +85,37 @@ export const throttle = ( func: ( ...args: any ) => any, delay: number ) => {
  * @param value that need to be proved
  * @returns true | false whether is a number or not
  */
-export const isNumber = ( value: string | number ): boolean => {
-  return ( ( value != null ) &&
-    ( value !== '' ) &&
-    !isNaN( Number( value.toString() ) ) )
+export const isNumber = (value: string | number): boolean => {
+  return ((value != null) &&
+    (value !== '') &&
+    !isNaN(Number(value.toString())))
+}
+
+/**
+  * Verifies whether the email is valid or not
+  *
+  * @param email
+  * @returns true or false
+*/
+export const isEmailValid = (email: string) => {
+
+  const validEmailRegex = /^[a-zA-Z0-9.!#$%&'+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:.[a-zA-Z0-9-]+)*$/
+
+  return validEmailRegex.test(email)
+}
+
+/**
+ * Verifies whether a password is secure or not
+ *
+ * @param password
+ * @returns true or false
+ */
+export const isPasswordSecure = (password: string): boolean => {
+
+
+  const strongPasswordRegex = new RegExp('^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#\$%\^&\*])(?=.{8,})')
+
+  console.log(`(${strongPasswordRegex.test(password)}) - ${password}`);
+
+  return strongPasswordRegex.test(password)
 }

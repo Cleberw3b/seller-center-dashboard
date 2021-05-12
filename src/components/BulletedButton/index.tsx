@@ -10,7 +10,9 @@ const BulletedButton: React.FC<BulletButtonProps> = ({ isActive, children, ...re
   return (
     <button className={isActive ? styles.buttonActive : styles.button} {...rest} >
       <div className={styles.bullet} />
-      {children}
+      <div className={styles.content}>
+        {children}
+      </div>
     </button>
   );
 }

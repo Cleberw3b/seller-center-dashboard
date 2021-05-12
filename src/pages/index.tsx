@@ -1,4 +1,4 @@
-import React, { useCallback, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 
 import Link from 'next/link';
 import { useRouter } from 'next/router'
@@ -24,6 +24,7 @@ interface SignInFormData {
 const SignIn: React.FC = () => {
   const formRef = useRef<FormHandles>(null);
   const [error, setError] = useState('');
+  const [isLoading, setLoading] = useState(false);
 
   const { user, signIn } = useAuth();
 
@@ -33,8 +34,12 @@ const SignIn: React.FC = () => {
     route.push('/dashboard');
   }
 
+  useEffect(() => { console.log(`Loading: ${isLoading}`) }, [isLoading])
+
   const handleSubmit = useCallback(
     async (data: SignInFormData) => {
+      setLoading(true);
+
       try {
         formRef.current?.setErrors({});
 
@@ -50,11 +55,23 @@ const SignIn: React.FC = () => {
           password: data.password,
         });
 
+        setLoading(false);
+
         route.push('/dashboard');
       } catch (err) {
+        setLoading(false);
+
         if (err instanceof Yup.ValidationError) {
           const errors = getValidationErrors(err);
           formRef.current?.setErrors(errors);
+
+          return;
+        }
+
+        if (!!err.response) {
+          if (err.response.status >= 400 && err.response.status <= 500) {
+            setError('Usuáro ou senha inválido');
+          }
 
           return;
         }
@@ -94,7 +111,14 @@ const SignIn: React.FC = () => {
               <a>Esqueci minha senha</a>
             </Link>
 
-            <Button type="submit" className={styles.buttonStyle}>Entrar</Button>
+            <Button type="submit" className={styles.buttonStyle}>
+              {
+                !isLoading ?
+                  <span>Entrar</span>
+                  :
+                  <div className={styles.dotFlashing} />
+              }
+            </Button>
 
             {/* <Link to="/forgot-password">Esqueci minha senha</Link> */}
           </Form>

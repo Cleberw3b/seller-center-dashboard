@@ -1,7 +1,10 @@
+@import '../../../public/styles/__dimensions.scss';
+
 .button {
+  // display: flex;
+  // flex-direction: row;
   display: flex;
-  flex-direction: row;
-  padding: 0.8rem 1.25rem;
+  padding: 0.4rem 1.25rem;
 
   background-color: var(--white);
 
@@ -14,14 +17,23 @@
   align-items: center;
   text-align: center;
 
-  font-size: 1rem;
+  font-size: 0.8rem;
   font-weight: 500;
+
+  @media screen and (min-width: $desktop-size) {
+    font-size: 1rem;
+    padding: 0.8rem 1.25rem;
+  }
+
+  .content {
+    flex: 1;
+  }
 
   .bullet {
     opacity: 0;
     width: 0rem;
     height: 0rem;
-    border-radius: 1rem;
+    border-radius: 0.6rem;
     background-color: var(--grafite);
 
     transition: opacity 0.2s, margin-right .2s;
@@ -35,7 +47,7 @@
     .bullet {
       width: 0.6rem;
       height: 0.6rem;
-      margin-right: 0.5rem;
+      margin-right: 0.25rem;
 
       opacity: 1;
     }
@@ -44,8 +56,7 @@
 
 .buttonActive {
   display: flex;
-  flex-direction: row;
-  padding: 0.8rem 1.25rem;
+  padding: 0.4rem 1.25rem;
 
   border: 0;
   border-radius: 2px;
@@ -60,17 +71,28 @@
   align-items: center;
   text-align: center;
 
-  font-size: 1rem;
+  font-size: 0.8rem;
   font-weight: 500;
 
+  @media screen and (min-width: $desktop-size) {
+    font-size: 1rem;
+    padding: 0.8rem 1.25rem;
+  }
+
+  .content {
+    flex: 1;
+  }
 
   .bullet {
+    // flex: 1;
     width: 0.6rem;
     height: 0.6rem;
-    margin-right: 0.5rem;
+    border-radius: 0.6rem;
+
+    margin-right: 0.25rem;
 
     opacity: 1;
-    border-radius: 1rem;
+
     background-color: var(--grafite);
 
     transition: opacity 0.2s, margin-right .2s;

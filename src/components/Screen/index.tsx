@@ -18,7 +18,8 @@ const Layout: React.FC = ({ children }) => {
     if (!user) {
       router.push('/');
     }
-    if (!isRegisterCompleted) {
+
+    if (!isRegisterCompleted && !router.pathname.includes('profile')) {
       router.push('/profile');
     }
   }, [user, router])
