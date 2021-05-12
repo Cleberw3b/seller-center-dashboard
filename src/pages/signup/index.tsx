@@ -88,7 +88,7 @@ const SignUp: React.FC = () => {
 
         setTimeout(() => {
           router.push('/');
-        }, 10000);
+        }, 3000);
 
         // history.push('/');
       } catch (err) {
@@ -119,7 +119,7 @@ const SignUp: React.FC = () => {
 
     if (successfull)
       router.push('/');
-  }, [isModalVisible])
+  }, [isModalVisible, successfull])
 
 
   const handleAvatarChange = useCallback(
