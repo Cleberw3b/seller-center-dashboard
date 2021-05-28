@@ -101,7 +101,7 @@ export function ProductForm() {
   }, [filesUrl])
 
   const calcTotalFields = useCallback((data: Product) => {
-    setTotalFields(9 + data.variations?.length * 4);
+    setTotalFields(9 + data.variations?.length * 3);
   }, [totalFields]);
 
   const calcFilledFields = useCallback((data: Product) => {

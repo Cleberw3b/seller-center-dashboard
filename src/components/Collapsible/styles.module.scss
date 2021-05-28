@@ -1,3 +1,5 @@
+@import '../../../public/styles/_dimensions';
+
 .container {
   input[type='checkbox'] {
     display: none;
@@ -11,19 +13,28 @@
   }
 
   .overflowItems {
-    font-size: 0.75rem;
+    font-size: 1rem;
     color: var(--gray-300);
 
     margin-left: 0.25rem;
+
+    @media screen and (min-width: $tablet_vertical) {
+      font-size: 0.75rem;
+    }
   }
 
   .lblToggle {
     cursor: pointer;
     display: block;
 
-    font-size: 0.75rem;
+    font-size: 1rem;
     text-decoration: underline;
-    color: var(--grafite);
+    color: var(--yellow-300);
+
+    @media screen and (min-width: $tablet_vertical) {
+      font-size: 0.75rem;
+      color: var(--grafite);
+    }
   }
 
   .collapsibleContent {

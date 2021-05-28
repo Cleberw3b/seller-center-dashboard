@@ -1,3 +1,5 @@
+@import '../../../public/styles/_dimensions';
+
 .container {
   background: #FFFFFF;
   border-radius: 6px;
@@ -14,7 +16,7 @@
   align-items: center;
 
   & + div {
-    margin-top: 1rem;
+    margin-top: 1.5rem;
   }
 
   input {
@@ -53,7 +55,7 @@
     align-items: center;
 
     & + div {
-      margin-top: 1rem;
+      margin-top: 1.5rem;
     }
 
     input {
@@ -91,7 +93,7 @@
     align-items: center;
 
     & + div {
-      margin-top: 1rem;
+      margin-top: 1.5rem;
     }
 
     input {
@@ -129,7 +131,7 @@
     align-items: center;
 
     & + div {
-      margin-top: 1rem;
+      margin-top: 1.5rem;
     }
 
     input {

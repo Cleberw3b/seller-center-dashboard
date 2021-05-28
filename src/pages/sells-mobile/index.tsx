@@ -1,19 +1,22 @@
-import React, { createRef, useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { FiCalendar, FiCameraOff, FiPaperclip, FiSearch } from 'react-icons/fi'
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { FiBox, FiCalendar, FiCheck, FiClipboard, FiMoreHorizontal, FiSearch, FiX, FiXCircle } from 'react-icons/fi'
+import { RiArrowGoBackFill } from 'react-icons/ri'
 import { FormHandles } from '@unform/core';
 import { GetStaticProps } from 'next';
-import { format, isSameWeek, isSameMonth, isToday, parseISO, parse, toDate, fromUnixTime } from 'date-fns';
+import { format, isSameWeek, isSameMonth, isToday, parse } from 'date-fns';
 import { Form } from '@unform/web';
 
-import Button from '../../components/FilterButton';
-import BulletedButton from '../../components/BulletedButton';
+import Button from '../../components/PrimaryButton';
+import FilterButton from '../../components/FilterButton';
+
 import FilterInput from '../../components/FilterInput';
 import StatusPanel from '../../components/OrderStatusPanel';
 
 import styles from './styles.module.scss';
 import DatePickerPopup from '../../components/DatePickerPopup';
 import Collapsible from '../../components/Collapsible';
-import AttachButton from '../../components/AttachButton';
+import HeaderDropdown from 'src/components/HeaderDropdown';
+import AttachButton from 'src/components/AttachButton';
 
 enum SellStatus {
   Entregue,
@@ -235,172 +238,209 @@ export function Sells({ sells }: SellsProps) {
   const [datePickerVisibility, setDatePickerVisibility] = useState(false);
 
   useEffect(() => {
-    console.log(`Alterou data: ${fromDateFilter}`);
-  }, []);
+    console.log(`Status: ${status}`);
+  }, [status]);
 
   return (
-    <div className={styles.sellsContainer}>
-      <div className={styles.sellsHeader}>
-        <BulletedButton
-          onClick={() => setStatus(SellStatus.Todos)}
-          isActive={status === SellStatus.Todos}>
-          Todas
+    <>
+      <div className={status !== SellStatus.Todos ? styles.sellsContainer : styles.sellsContainerShorter}>
+        <div className={styles.sellsHeader}>
+          <HeaderDropdown items={[
+            { text: 'Todas', value: SellStatus.Todos },
+            { text: 'Aguardando Pagamento', value: SellStatus.Processando },
+            { text: 'Aguardando Faturamento', value: SellStatus.Faturando },
+            { text: 'Aguardando Despacho', value: SellStatus.Despachando },
+            { text: 'Retornados', value: SellStatus.Retornado },
+            { text: 'Cancelados', value: SellStatus.Cancelado }
+          ]}
+            setActiveItem={setStatus} />
+          {/* <BulletedButton
+            onClick={() => setStatus(SellStatus.Todos)}
+            isActive={status === SellStatus.Todos}>
+            Todas
         </BulletedButton>
-        <BulletedButton
-          onClick={() => setStatus(SellStatus.Processando)}
-          isActive={status === SellStatus.Processando}>
-          Aguardando Pagamento
+          <BulletedButton
+            onClick={() => setStatus(SellStatus.Processando)}
+            isActive={status === SellStatus.Processando}>
+            Aguardando Pagamento
         </BulletedButton>
-        <BulletedButton
-          onClick={() => setStatus(SellStatus.Faturando)}
-          isActive={status === SellStatus.Faturando}>
-          Aguardando Faturamento
+          <BulletedButton
+            onClick={() => setStatus(SellStatus.Faturando)}
+            isActive={status === SellStatus.Faturando}>
+            Aguardando Faturamento
         </BulletedButton>
-        <BulletedButton
-          onClick={() => setStatus(SellStatus.Despachando)}
-          isActive={status === SellStatus.Despachando}>
-          Aguardando Despacho
+          <BulletedButton
+            onClick={() => setStatus(SellStatus.Despachando)}
+            isActive={status === SellStatus.Despachando}>
+            Aguardando Despacho
         </BulletedButton>
-        <BulletedButton
-          onClick={() => setStatus(SellStatus.Retornado)}
-          isActive={status === SellStatus.Retornado}>
-          Retornados
+          <BulletedButton
+            onClick={() => setStatus(SellStatus.Retornado)}
+            isActive={status === SellStatus.Retornado}>
+            Retornados
         </BulletedButton>
-        <BulletedButton
-          onClick={() => setStatus(SellStatus.Cancelado)}
-          isActive={status === SellStatus.Cancelado}>
-          Cancelados
+          <BulletedButton
+            onClick={() => setStatus(SellStatus.Cancelado)}
+            isActive={status === SellStatus.Cancelado}>
+            Cancelados
         </BulletedButton>
-        <BulletedButton
-          onClick={() => setStatus(SellStatus.Entregue)}
-          isActive={status === SellStatus.Entregue}>
-          Entregues
-        </BulletedButton>
-      </div>
-      <div className={styles.divider} />
-      <div className={styles.sellsContent}>
-        <div className={styles.sellsOptions}>
-          <div className={styles.contentFilters}>
-            <Button isActive={filter === Filter.Hoje} onClick={() => setFilter(Filter.Hoje)}>
-              Hoje
-            </Button>
-            <Button isActive={filter === Filter.Semana} onClick={() => setFilter(Filter.Semana)}>
-              Esta semana
-            </Button>
-            <Button isActive={filter === Filter.Mes} onClick={() => setFilter(Filter.Mes)}>
-              Este mês
-            </Button>
-            <div className={styles.verticalDivider} />
-            <div>
-              <Button
-                icon={FiCalendar}
-                isActive={filter === Filter.Custom}
-                onClick={() => {
-                  setFilter(Filter.Custom);
-                  setDatePickerVisibility(!datePickerVisibility);
-                }}>Escolher período</Button>
-
-              {filter === Filter.Custom && (
-                <DatePickerPopup
-                  formRef={datePickerRef}
-                  setToDateFilter={setToDateFilter}
-                  setFromDateFilter={setFromDateFilter}
-                  style={{
-                    marginBottom: '-13.25rem'
-                  }}
-                  className={styles.datePopupContainer}
-                  visibility={datePickerVisibility}
-                  setVisibility={setDatePickerVisibility}
-                />
-              )}
-            </div>
-            <Form ref={formRef} onSubmit={handleSubmit} className={styles.searchContainer}>
-              <FilterInput
-                name="search"
-                icon={FiSearch}
-                placeholder="Pesquise um produto..."
-                autoComplete="off" />
-            </Form>
-          </div>
+          <BulletedButton
+            onClick={() => setStatus(SellStatus.Entregue)}
+            isActive={status === SellStatus.Entregue}>
+            Entregues
+        </BulletedButton> */}
         </div>
-        {status === SellStatus.Todos && (
-          <div className={styles.orderStatusButtons}>
-            <StatusPanel title='Todos' onClick={() => setOrderStatus(OrderStatus.Todos)} isActive={orderStatus === OrderStatus.Todos}>
-              <span className={styles.grayText}> {total} </span>
-            </StatusPanel>
-            <StatusPanel title='Aprovados' onClick={() => setOrderStatus(OrderStatus.Aprovado)} isActive={orderStatus === OrderStatus.Aprovado}>
-              <span className={styles.greenText}> {totalApproved} </span>
-            </StatusPanel>
-            <StatusPanel title='Processando' onClick={() => setOrderStatus(OrderStatus.Processando)} isActive={orderStatus === OrderStatus.Processando}>
-              <span className={styles.blueText}> {totalProcessing} </span>
-            </StatusPanel>
-            <StatusPanel title='Cancelados' onClick={() => setOrderStatus(OrderStatus.Cancelado)} isActive={orderStatus === OrderStatus.Cancelado}>
-              <span className={styles.redText}> {totalCanceled} </span>
-            </StatusPanel>
-            <StatusPanel title='Devolvidos' onClick={() => setOrderStatus(OrderStatus.Devolvido)} isActive={orderStatus === OrderStatus.Devolvido}>
-              <span className={styles.orangeText}> {totalReturned} </span>
-            </StatusPanel>
-          </div>
-        )}
-        {items.length > 0 ? (
-          <table className={styles.table}>
-            <thead className={styles.tableHeader}>
-              <tr>
-                <th>Número do pedido</th>
-                <th>Produtos</th>
-                <th>Data</th>
-                <th>Valor</th>
-                <th>Status</th>
-                <th>Ação</th>
-              </tr>
-            </thead>
-            <tbody className={styles.tableBody}>
-              {items.map((item, i) => (
-                <tr className={styles.tableItem} key={item.order_number} ref={itemsRef[i]}>
-                  <td width='12.5%'>
-                    {item.order_number}
-                  </td>
-                  <td id={styles.itemsCell}>
-                    {
-                      item.products.map((product, i) => {
-                        return (i < 2 && <p key={i}>{product.name}</p>)
-                      })
-                    }
-                    {
-                      item.products.length > 2 && (
-                        <>
-                          <Collapsible totalItems={item.products.length} toggleRef={!!collapsibleRefs ? collapsibleRefs[i] : undefined}>
-                            {
-                              item.products.map((product, i) => {
-                                if (i < 2)
-                                  return (<></>)
+        <div className={styles.divider} />
+        <div className={styles.sellsContent}>
+          <div className={styles.sellsOptions}>
+            <div className={styles.contentFilters}>
+              <FilterButton isActive={filter === Filter.Hoje} onClick={() => setFilter(Filter.Hoje)}>
+                Hoje
+              </FilterButton>
+              <FilterButton isActive={filter === Filter.Semana} onClick={() => setFilter(Filter.Semana)}>
+                Esta semana
+              </FilterButton>
+              <FilterButton isActive={filter === Filter.Mes} onClick={() => setFilter(Filter.Mes)}>
+                Este mês
+              </FilterButton>
+              <div>
+                <FilterButton
+                  icon={FiCalendar}
+                  isActive={filter === Filter.Custom}
+                  onClick={() => {
+                    setFilter(Filter.Custom);
+                    setDatePickerVisibility(!datePickerVisibility);
+                  }}>
+                  Escolher período
+                </FilterButton>
 
-                                return (
-                                  <p key={i}>{product.name}</p>
-                                )
-                              })
-                            }
-                          </Collapsible>
-                        </>
+                {filter === Filter.Custom && (
+                  <DatePickerPopup
+                    formRef={datePickerRef}
+                    setToDateFilter={setToDateFilter}
+                    setFromDateFilter={setFromDateFilter}
+                    style={{
+                      // marginBottom: '-13.25rem',
+                      marginTop: '-3rem',
+                      marginLeft: '-11rem'
+                    }}
+                    className={styles.datePopupContainer}
+                    visibility={datePickerVisibility}
+                    setVisibility={setDatePickerVisibility}
+                  />
+                )}
+              </div>
+              <Form ref={formRef} onSubmit={handleSubmit} className={styles.searchContainer}>
+                <FilterInput
+                  name="search"
+                  icon={FiSearch}
+                  placeholder="Pesquise um produto..."
+                  autoComplete="off" />
+              </Form>
+            </div>
+          </div>
+          {items.length > 0 ? (
+            <div>
+              {items.map((item, i) => (
+                <div className={styles.itemCard}>
+                  <div className={styles.cardHeader}>
+                    <span className={styles.start}>
+                      <FiClipboard />
+                      Pedido: <b>{item.order_number}</b>
+                    </span>
+                    <span className={styles.end}>
+                      <FiCalendar />
+                      {format(item.date, 'dd/MM/yyyy')}
+                    </span>
+                  </div>
+                  <div className={styles.cardDivider} />
+                  <div className={styles.cardBody}>
+                    <div className={styles.products}>
+                      <span style={{ marginBottom: '0.5rem' }}><b>Produtos</b></span>
+                      {
+                        item.products.map((product, i) => {
+                          return (i < 2 && <p key={i}>{product.name}</p>)
+                        })
+                      }
+                      {
+                        item.products.length > 2 && (
+                          <>
+                            <Collapsible totalItems={item.products.length} toggleRef={!!collapsibleRefs ? collapsibleRefs[i] : undefined}>
+                              {
+                                item.products.map((product, i) => {
+                                  if (i < 2)
+                                    return (<></>)
+
+                                  return (
+                                    <p key={i}>{product.name}</p>
+                                  )
+                                })
+                              }
+                            </Collapsible>
+                          </>
+                        )
+                      }
+                    </div>
+                    {
+                      item.status === SellStatus.Entregue && (
+                        <div className={styles.approvedItem}>
+                          <FiCheck />
+                            Entregue
+                        </div>
                       )
                     }
-                  </td>
-                  <td id={styles.dateCell}>
-                    {format(item.date, 'dd/MM/yyyy')}
-                  </td>
-                  <td id={styles.valueCell}>
                     {
+                      item.status === SellStatus.Processando && (
+                        <div className={styles.processingItem}>
+                          <FiMoreHorizontal />
+                            Proceesando
+                        </div>
+                      )
+                    }
+                    {
+                      item.status === SellStatus.Faturando && (
+                        <div className={styles.processingItem}>
+                          <FiMoreHorizontal />
+                            Faturando
+                        </div>
+                      )
+                    }
+                    {
+                      item.status === SellStatus.Despachando && (
+                        <div className={styles.processingItem}>
+                          <FiMoreHorizontal />
+                            Despachando
+                        </div>
+                      )
+                    }
+                    {
+                      item.status === SellStatus.Cancelado && (
+                        <div className={styles.canceledItem}>
+                          <FiX />
+                            Cancelado
+                        </div>
+                      )
+                    }
+                    {
+                      item.status === SellStatus.Retornado && (
+                        <div className={styles.returnedItem}>
+                          <RiArrowGoBackFill />
+                            Retornado
+                        </div>
+                      )
+                    }
+                  </div>
+                  <div className={styles.cardDivider} />
+                  <div className={styles.cardFooter}>
+                    <span>Valor: {
                       new Intl.NumberFormat('pt-BR', {
                         style: 'currency',
                         currency: 'BRL',
                       }
                       ).format(item.total)
                     }
-                  </td>
-                  <td width='12.5%'>
-                    {SellStatus[item.status]}
-                  </td>
-                  <td id={status === SellStatus.Faturando || status === SellStatus.Despachando ? styles.attachmentCell : styles.actionCell}>
+                    </span>
+
                     {status === SellStatus.Faturando ?
                       <AttachButton
                         name={item.id}
@@ -423,20 +463,43 @@ export function Sells({ sells }: SellsProps) {
                           isAttached={!!item.nfe_url}
                         />
                         :
-                        <span className={styles.action} style={{ cursor: 'help', opacity: 0.5 }} title="Desabilitado"> Ver detalhes </span>
+                        <Button customStyle={{ className: styles.detailsButton }}>
+                          Ver detalhes
+                        </Button>
                     }
-                  </td>
-                </tr>
+                  </div>
+                </div>
               )
               )
               }
-            </tbody>
-          </table>
-        ) : (
-          <span className={styles.emptyList}> Nenhum item foi encontrado </span>
+            </div>
+          ) : (
+            <span className={styles.emptyList}> Nenhum item foi encontrado </span>
+          )}
+        </div>
+        {status === SellStatus.Todos && (
+          <div className={styles.sellsFooter}>
+            <div className={styles.orderStatusButtons}>
+              <StatusPanel title='Todos' onClick={() => setOrderStatus(OrderStatus.Todos)} isActive={orderStatus === OrderStatus.Todos}>
+                <span className={styles.grayText}> {total} </span>
+              </StatusPanel>
+              <StatusPanel title='Aprovados' onClick={() => setOrderStatus(OrderStatus.Aprovado)} isActive={orderStatus === OrderStatus.Aprovado}>
+                <span className={styles.greenText}> {totalApproved} </span>
+              </StatusPanel>
+              <StatusPanel title='Processando' onClick={() => setOrderStatus(OrderStatus.Processando)} isActive={orderStatus === OrderStatus.Processando}>
+                <span className={styles.blueText}> {totalProcessing} </span>
+              </StatusPanel>
+              <StatusPanel title='Cancelados' onClick={() => setOrderStatus(OrderStatus.Cancelado)} isActive={orderStatus === OrderStatus.Cancelado}>
+                <span className={styles.redText}> {totalCanceled} </span>
+              </StatusPanel>
+              <StatusPanel title='Devolvidos' onClick={() => setOrderStatus(OrderStatus.Devolvido)} isActive={orderStatus === OrderStatus.Devolvido}>
+                <span className={styles.orangeText}> {totalReturned} </span>
+              </StatusPanel>
+            </div>
+          </div>
         )}
       </div>
-    </div >
+    </>
   )
 }
 

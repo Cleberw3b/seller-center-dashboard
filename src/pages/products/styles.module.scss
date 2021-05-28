@@ -13,6 +13,8 @@
   padding-left: 2.5rem;
 
   .productsHeader {
+    min-height: 3rem;
+
     display: grid;
     grid-template-columns: 1fr 1fr 1fr 1fr 1fr .5fr;
     column-gap: 1rem;
@@ -72,7 +74,6 @@
 
         form {
           flex: 1;
-          margin-left: 2rem;
         }
       }
     }

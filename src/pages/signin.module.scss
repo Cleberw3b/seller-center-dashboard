@@ -1,3 +1,5 @@
+@import '../../public/styles/_dimensions';
+
 @keyframes appearFromLeft {
   0% {
     opacity: 0;
@@ -162,8 +164,8 @@
       font-size: 1rem;
       color: var(--white);
       display: block;
-      // margin-top: 24px;
-      margin-top: 0.5rem;
+      margin-top: 1.5rem;
+      // margin-top: 0.5rem;
       // text-decoration: none;
 
       transition: filter 0.2s;
@@ -202,8 +204,15 @@
   flex: 2;
   background: url('https://media-exp1.licdn.com/dms/image/C4D1BAQHe7QwF-I2DGA/company-background_10000/0/1612556505453?e=2159024400&v=beta&t=7hGu7xGPv5oMpTZFDqmGGzeJZcpe5-kyeWVv1ete-kc') no-repeat center;
   background-size: cover;
-  // filter: grayscale(1);
   animation: appear 1s;
+
+  @media screen and (max-width: $cellphone) {
+    display: none;
+  }
+
+  @media screen and (max-width: $tablet_vertical) {
+    flex: 1;
+  }
 }
 
 .buttonStyle {
@@ -211,7 +220,7 @@
   width: 6rem;
   height: 3rem;
 
-  margin-top: 1.5rem;
+  margin-top: 2rem;
   padding: 0 0.75rem;
 
   background: var(--yellow-300);

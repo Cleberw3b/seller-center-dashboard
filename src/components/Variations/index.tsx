@@ -2,7 +2,7 @@ import AddButton from '../AddButton';
 import Dropdown from '../Dropdown';
 import Input from '../Input';
 import { FormHandles, Scope, useField } from '@unform/core';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { FaPlus } from 'react-icons/fa';
 
 import styles from './styles.module.scss';
@@ -17,21 +17,33 @@ type Variation = {
 
 interface VariationsControllerProps {
   name: string;
+  initial_vars?: Variation[];
 }
 
 interface VariationRefProps extends FormHandles {
   variations: Variation[];
 }
 
-const VariationsController: React.FC<VariationsControllerProps> = ({ name }: VariationsControllerProps) => {
+const VariationsController: React.FC<VariationsControllerProps> = ({ name, initial_vars }: VariationsControllerProps) => {
   const variationsRef = useRef<VariationRefProps>(null);
   const { fieldName, registerField, defaultValue = [{}] } = useField(name);
 
-  const [variations, setVariations] = useState<Variation[]>(defaultValue);
+  const [variations, setVariations] = useState<Variation[]>((!!initial_vars && initial_vars.length) > 0 ? initial_vars : defaultValue);
 
   const handleAddVariation = useCallback(() => {
     setVariations([...variations, {}])
   }, [variations]);
+
+  const { width } = useMemo(() => {
+    if (typeof window !== 'undefined') {
+      return { width: window.innerWidth, height: window.innerHeight }
+    }
+
+    return {
+      width: undefined,
+      height: undefined,
+    }
+  }, [process.browser]);
 
   useEffect(() => {
     registerField({
@@ -56,29 +68,48 @@ const VariationsController: React.FC<VariationsControllerProps> = ({ name }: Var
       {
         variations.map((variation, i) => {
           return (
-            <Scope path={`variations[${i}]`}>
-              <div className={styles.variationContainer}>
+            <Scope key={i} path={`variations[${i}]`}>
+              <div className={(!!width && width < 768) ? styles.variationContainerMobile : styles.variationContainer}>
                 <span>Variação {i + 1}</span>
-                {/* <Dropdown
-                  name='type'
-                  label='Tipo da medida'
-                  options={[{ value: 'number', label: 'Medida' }, { value: 'size', label: 'Tamanho' }]} /> */}
-                <Input
-                  name='size'
-                  label={'Tamanho/medida'}
-                  placeholder='Tamanho/medida'
-                  autoComplete='off'
-                />
-                <Input
-                  name='stock'
-                  label={'Estoque'}
-                  placeholder='Quantidade em estoque'
-                  autoComplete='off'
-                />
-                <Dropdown
-                  name='color'
-                  label='Escolha a cor'
-                  options={[{ value: 'blue', label: 'Azul' }, { value: 'yellow', label: 'Amarela' }, { value: 'black', label: 'Preta' }, { value: 'pink', label: 'Rosa' }, { value: 'red', label: 'Vermelha' }, { value: 'Green', label: 'Verde' }, { value: 'other', label: 'Outra' }]} />
+                {(!!width && width < 768) ? (
+                  <div className={styles.fieldsContainer}>
+                    <Input
+                      name='size'
+                      label={'Tamanho/medida'}
+                      placeholder='Tamanho/medida'
+                      autoComplete='off'
+                    />
+                    <Input
+                      name='stock'
+                      label={'Estoque'}
+                      placeholder='Quantidade em estoque'
+                      autoComplete='off'
+                    />
+                    <Dropdown
+                      name='color'
+                      label='Escolha a cor'
+                      options={[{ value: 'blue', label: 'Azul' }, { value: 'yellow', label: 'Amarela' }, { value: 'black', label: 'Preta' }, { value: 'pink', label: 'Rosa' }, { value: 'red', label: 'Vermelha' }, { value: 'Green', label: 'Verde' }, { value: 'other', label: 'Outra' }]} />
+                  </div>
+                ) : (
+                  <>
+                    <Input
+                      name='size'
+                      label={'Tamanho/medida'}
+                      placeholder='Tamanho/medida'
+                      autoComplete='off'
+                    />
+                    <Input
+                      name='stock'
+                      label={'Estoque'}
+                      placeholder='Quantidade em estoque'
+                      autoComplete='off'
+                    />
+                    <Dropdown
+                      name='color'
+                      label='Escolha a cor'
+                      options={[{ value: 'blue', label: 'Azul' }, { value: 'yellow', label: 'Amarela' }, { value: 'black', label: 'Preta' }, { value: 'pink', label: 'Rosa' }, { value: 'red', label: 'Vermelha' }, { value: 'Green', label: 'Verde' }, { value: 'other', label: 'Outra' }]} />
+                  </>
+                )}
               </div>
             </Scope>
           )
@@ -87,7 +118,7 @@ const VariationsController: React.FC<VariationsControllerProps> = ({ name }: Var
       <div className={styles.addButtonContainer}>
         <AddButton icon={FaPlus} onClick={handleAddVariation} type='button'><span>Adicionar variação</span></AddButton>
       </div>
-    </div>
+    </div >
   )
 }
 

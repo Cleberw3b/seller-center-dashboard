@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { GetStaticProps } from "next";
 import { FormHandles } from '@unform/core';
 import { Form } from '@unform/web';
-import { isSameDay, isSameWeek, isSameMonth, parse, format } from 'date-fns';
+import { format } from 'date-fns';
 import { FiSearch, FiCameraOff, FiEdit } from 'react-icons/fi';
 
 import BulletedButton from '../../components/BulletedButton';
@@ -57,16 +57,6 @@ export function Products({ }: ProductsProps) {
   const [items, setItems] = useState([] as Product[]);
   const [search, setSeacrh] = useState('');
   const [loading, setLoading] = useState(false);
-
-  const { width } = useMemo(() => {
-    if (typeof window !== 'undefined') {
-      return { width: window.innerWidth }
-    }
-
-    return {
-      width: undefined
-    }
-  }, [process.browser]);
 
   let products: Product[] = [];
 
@@ -132,15 +122,11 @@ export function Products({ }: ProductsProps) {
 
   }, [items]);
 
-  useEffect(() => {
-    console.log(width)
-  }, [width])
-
   return (
     <div className={styles.productsContainer}>
       <div className={styles.productsHeader}>
         <BulletedButton
-          onClick={() => { router.push('/products') }}
+          onClick={() => { router.push('/products-mobile') }}
           isActive>
           Meus produtos
         </BulletedButton>
@@ -166,89 +152,73 @@ export function Products({ }: ProductsProps) {
             </Form>
           </div>
         </div>
-        <div className={styles.tableContainer}>
-          {items.length > 0 ? (
-            <table className={styles.table}>
-              <thead className={styles.tableHeader}>
-                <tr>
-                  <th>Foto</th>
-                  <th>Nome do produto</th>
-                  <th>Marca</th>
-                  <th>SKU</th>
-                  <th>Data</th>
-                  <th>Valor</th>
-                  <th>Estoque</th>
-                  <th>Status</th>
-                  <th>Ação</th>
-                </tr>
-              </thead>
-              <tbody className={styles.tableBody}>
-                {items.map((item, i) => (
-                  <tr className={styles.tableItem} key={item.id}>
-                    <td id={styles.imgCell} >
-                      {item.image ? <img src={item.image} alt={item.name} /> : <FiCameraOff />}
-                    </td>
-                    <td id={styles.nameCell}>
-                      {item.name}
-                    </td>
-                    <td>
-                      {item.brand}
-                    </td>
-                    <td>
-                      {item.sku}
-                    </td>
-                    <td id={styles.dateCell}>
-                      {item.date}
-                    </td>
-                    <td id={styles.valueCell}>
-                      {
-                        new Intl.NumberFormat('pt-BR', {
-                          style: 'currency',
-                          currency: 'BRL',
-                        }
-                        ).format(item.value)
+        {items.length > 0 ? (
+          items.map((item, i) => (
+            <div className={styles.itemCard}>
+              <div className={styles.cardBody}>
+                <div className={styles.cardImg}>
+                  {item.image ? <img src={item.image} alt={item.name} /> : <FiCameraOff />}
+                </div>
+                <div className={styles.itemInfo}>
+                  <span className={styles.itemName}>{item.name}</span>
+                  <div>
+                    SKU: <b>{item.sku}</b>
+                  </div>
+                  <div>
+                    Marca: <b>{item.brand}</b>
+                  </div>
+                  <div>
+                    Cadastro: <b>{item.date}</b>
+                  </div>
+                  <div className={styles.value}>
+                    <span>Valor: {
+                      new Intl.NumberFormat('pt-BR', {
+                        style: 'currency',
+                        currency: 'BRL',
                       }
-                    </td>
-                    <td className={item.stock <= 0 ? styles.redText : ''}>
-                      {item.stock}
-                    </td>
-                    <td id={styles.switchCell}>
-                      <MuiThemeProvider theme={theme}>
-                        <Switch
-                          checked={item.status === ProductStatus.Ativado}
-                          onChange={() => handleAvailability(item.id)}
-                          classes={{
-                            root: switchStyles.root,
-                            thumb: item.status === ProductStatus.Ativado ? switchStyles.thumb : switchStyles.thumbUnchecked,
-                            track: item.status === ProductStatus.Ativado ? switchStyles.track : switchStyles.trackUnchecked,
-                            checked: switchStyles.checked,
-                          }}
-                        />
-                      </MuiThemeProvider>
-                      <span className={styles.switchSubtitle}>{item.status === ProductStatus.Ativado ? 'Ativado' : 'Desativado'}</span>
-                    </td>
-                    <td id={styles.editCell}>
-                      <div onClick={() => {
-                        router.push({
-                          pathname: 'products/edit',
-                          query: {
-                            id: item.id,
-                          }
-                        })
-                      }}>
-                        <FiEdit />
-                        <span> Editar </span>
-                      </div>
-                    </td>
-                  </tr>
-                ))
-                }
-              </tbody>
-            </table>
-          ) : (
-            <span className={styles.emptyList}> Nenhum item foi encontrado </span>
-          )}
-        </div>
+                      ).format(item.value)
+                    }</span>
+                  </div>
+                </div>
+                <div className={styles.switchContainer}>
+                  <MuiThemeProvider theme={theme}>
+                    <Switch
+                      checked={item.status === ProductStatus.Ativado}
+                      onChange={() => handleAvailability(item.id)}
+                      classes={{
+                        root: switchStyles.root,
+                        thumb: item.status === ProductStatus.Ativado ? switchStyles.thumb : switchStyles.thumbUnchecked,
+                        track: item.status === ProductStatus.Ativado ? switchStyles.track : switchStyles.trackUnchecked,
+                        checked: switchStyles.checked,
+                      }}
+                    />
+                  </MuiThemeProvider>
+                  <span className={styles.switchSubtitle}>{item.status === ProductStatus.Ativado ? 'Ativado' : 'Desativado'}</span>
+                  <div className={styles.stockContainer}>
+                    <span className={item.stock > 0 ? styles.stock : styles.outStock}>{item.stock}</span>
+                    <span>Em estoque</span>
+                  </div>
+                </div>
+              </div>
+              <div className={styles.cardDivider} />
+              <div className={styles.cardFooter}>
+                <div onClick={() => {
+                  router.push({
+                    pathname: 'products/edit',
+                    query: {
+                      id: item.id,
+                    }
+                  })
+                }}>
+                  <FiEdit />
+                  <span> Editar </span>
+                </div>
+              </div>
+            </div>
+          ))
+        ) : (
+          <span className={styles.emptyList}> Nenhum item foi encontrado </span>
+        )}
       </div>
     </div>
   )
@@ -264,7 +234,7 @@ export let productsFromApi: Product[] = [
     date: format(new Date(), 'dd/MM/yyyy'),
     value: 299.90,
     stock: 23,
-    image: 'https://images-americanas.b2w.io/produtos/01/00/img/2608684/5/2608684535_1GG.jpg'
+    image: 'https://ozllo.vteximg.com.br/arquivos/ids/247789-1000-1263/image-f16b8e9009eb422698d1f902a2beb94f.jpg?v=637544503040600000'
   },
   {
     id: '2',
@@ -275,7 +245,7 @@ export let productsFromApi: Product[] = [
     date: format(new Date(), 'dd/MM/yyyy'),
     value: 299.90,
     stock: 23,
-    image: 'https://images-americanas.b2w.io/produtos/01/00/img/2608684/5/2608684535_1GG.jpg'
+    image: 'https://ozllo.vteximg.com.br/arquivos/ids/247789-1000-1263/image-f16b8e9009eb422698d1f902a2beb94f.jpg?v=637544503040600000'
   },
   {
     id: '3',

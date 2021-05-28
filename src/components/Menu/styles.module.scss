@@ -1,5 +1,14 @@
 @import '../../../public/styles/__dimensions.scss';
 
+@keyframes outsideAppear {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 0.5;
+  }
+}
+
 .menuOpen {
   z-index: 3;
 
@@ -10,7 +19,7 @@
   border-radius: 0px 6px 6px 0px;
   box-shadow: 16px 0px 52px -28px rgba(0,0,0,0.5);
 
-  width: 14rem;
+  width: 15rem;
   height: 100vh;
 
   text-align: left;
@@ -20,10 +29,6 @@
 
   transition: transform 0.5s ease-in-out;
   transform: translateX(0);
-
-  @media(min-width: 1400px) {
-    width: 15rem;
-  }
 
   h1 {
     color: #FFFFFF;
@@ -40,7 +45,7 @@
   border-radius: 0px 6px 6px 0px;
   box-shadow: 16px 0px 52px -28px rgba(0,0,0,0.5);
 
-  width: 14rem;
+  width: 15rem;
   height: 100vh;
 
   text-align: left;
@@ -50,10 +55,6 @@
 
   transition: transform 0.5s ease-in-out;
   transform: translateX(-150%);
-
-  @media(min-width: 1400px) {
-    width: 17rem;
-  }
 
   h1 {
     color: #FFFFFF;
@@ -69,15 +70,38 @@
   padding: 1.25rem;
   margin-bottom: 0.75rem;
 
-  svg {
-    transition: filter 0.5s;
-  }
+  > svg {
+    width: 2rem;
+    height: 2rem;
 
-  svg:hover {
-    filter: brightness(0.8);
+    transition: filter 0.5s;
+
+    &:hover {
+      filter: brightness(0.8);
+    }
+
+    @media screen and (min-width: $desktop-small-size) {
+      width: 2.5rem;
+      height: 2.5rem;
+    }
   }
 
   img {
     width: 8rem;
   }
+}
+
+.outside {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  right: 0;
+  left: 0;
+  background-color: var(--grafite);
+
+  opacity: 0.5;
+
+  animation: outsideAppear 0.5s;
+
+  z-index: 2;
 }

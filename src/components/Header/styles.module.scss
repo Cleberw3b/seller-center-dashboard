@@ -1,43 +1,67 @@
+@import '../../../public/styles/_dimensions';
+
 .headerContainer {
-  height: 5rem;
+  height: 4rem;
   background-color: var(--yellow-50);
+
+  @media screen and (min-width: $desktop-size) {
+    height: 5rem;
+  }
 }
 
 .headerContent {
   // max-width: 1120px;
-  height: 5rem;
+  height: 100%;
 
   display: flex;
   align-items: center;
+
+  @media screen and (max-width: $cellphone) {
+    padding: 0.5rem;
+  }
 
   nav {
     width: 100%;
     display: flex;
     justify-content: space-between;
     margin-left: 1rem;
-    height: 5rem;
+    height: 100%;
 
     h2 {
-      display: inline-block;
       position: relative;
-      padding: 0 0.5rem;
-      align-self: center;
-      // line-height: 5rem;
-      font-size: 1.7rem;
-      color: var(--grafite);
-      font-weight: bold;
-    }
 
-    > span {
-      display: inline-block;
-      position: relative;
-      align-self: center;
       padding: 0 0.5rem;
 
       font-size: 1rem;
+      align-self: center;
+      color: var(--grafite);
+      font-weight: bold;
+
+      @media screen and (min-width: $tablet_vertical) {
+        font-size: 1.5rem;
+      }
+
+      @media screen and (min-width: $desktop-size) {
+        font-size: 1.7rem;
+      }
+    }
+
+    > span {
+      flex: 1;
+
+      position: relative;
+      align-self: center;
+
+      padding: 0 0.5rem;
+
+      font-size: 0.8rem;
       font-weight: lighter;
+      text-align: center;
       color: var(--gray-400);
-      // line-height: 5rem;
+
+      @media screen and (min-width: $desktop-size) {
+        font-size: 1rem;
+      }
     }
   }
 

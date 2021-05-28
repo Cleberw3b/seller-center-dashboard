@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 
 import Footer from '../Footer';
 import Menu from '../Menu';
@@ -9,10 +9,25 @@ import { useAuth } from '../../hooks/auth';
 import { useRouter } from 'next/router';
 
 const Layout: React.FC = ({ children }) => {
+  const { width } = useMemo(() => {
+    if (typeof window !== 'undefined') {
+      return { width: window.innerWidth, height: window.innerHeight }
+    }
+
+    return {
+      width: undefined,
+      height: undefined,
+    }
+  }, [process.browser]);
+
   const [open, setOpen] = useState(true);
 
   const { user, isRegisterCompleted } = useAuth();
   const router = useRouter();
+
+  useEffect(() => {
+    setOpen(!!width && width >= 1152)
+  }, [width])
 
   useEffect(() => {
     if (!user) {
@@ -22,8 +37,7 @@ const Layout: React.FC = ({ children }) => {
     if (!isRegisterCompleted && !router.pathname.includes('profile')) {
       router.push('/profile');
     }
-  }, [user, router])
-
+  }, [user, router]);
 
   return (
     <>

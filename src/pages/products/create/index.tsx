@@ -84,6 +84,16 @@ export function NewProduct({ nationalities: nationalitiesFromApi, categories: ca
 
   const router = useRouter();
 
+  const { width } = useMemo(() => {
+    if (typeof window !== 'undefined') {
+      return { width: window.innerWidth }
+    }
+
+    return {
+      width: undefined
+    }
+  }, [process.browser]);
+
   useEffect(() => {
     setNationalities(nationalitiesFromApi);
     setCategories(categoriesFromApi);
@@ -122,7 +132,7 @@ export function NewProduct({ nationalities: nationalitiesFromApi, categories: ca
     <main className={styles.container}>
       <section className={styles.header}>
         <BulletedButton
-          onClick={() => { router.push('/products') }}>
+          onClick={() => { router.push((!!width && width < 768) ? '/products-mobile' : '/products') }}>
           Meus produtos
         </BulletedButton>
         <BulletedButton
@@ -150,6 +160,7 @@ export function NewProduct({ nationalities: nationalitiesFromApi, categories: ca
                   key={n.id}
                   onClick={() => handleNationality(n)}
                   isActive={nationality?.id === n.id}
+                  pointer={(!!width && width >= 768)}
                 >
                   {n.name}
                 </StateButton>
@@ -166,6 +177,7 @@ export function NewProduct({ nationalities: nationalitiesFromApi, categories: ca
                         key={c.id}
                         onClick={() => handleCategory(c)}
                         isActive={category?.id === c.id}
+                        pointer={(!!width && width >= 768)}
                         borders
                       >
                         {c.name}
@@ -373,7 +385,7 @@ const categoriesFromApi: Category[] = [
         name: 'Bijoux',
       },
     ]
-  }
+  },
 ]
 
 export default NewProduct;

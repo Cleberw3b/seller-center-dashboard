@@ -1,36 +1,56 @@
-@mixin transform($value){
-  -webkit-transform: ($value);
-     -moz-transform: ($value);
-      -ms-transform: ($value);
-          transform: ($value);
-}
-@mixin transition($value){
-  -webkit-transition: ($value);
-     -moz-transition: ($value);
-      -ms-transition: ($value);
-          transition: ($value);
-}
+@import '../../../public/styles/_dimensions';
 
+// @mixin transform($value){
+//   -webkit-transform: ($value);
+//      -moz-transform: ($value);
+//       -ms-transform: ($value);
+//           transform: ($value);
+// }
+
+// @mixin transition($value){
+//   -webkit-transition: ($value);
+//      -moz-transition: ($value);
+//       -ms-transition: ($value);
+//           transition: ($value);
+// }
 
 .profileContainer {
-  width: 200px;
+  width: 100px;
+
   display: flex;
   flex-direction: column;
-  // justify-content: space-between;
   align-items: center;
+
   z-index: 1;
 
-  margin-top: 0.4rem;
+  margin-top: 0.1rem;
+  padding-top: 0.2rem;
   margin-right: 0.5rem;
 
-  &:hover {
-    height: 13rem;
+  @media screen and (min-width: $tablet_vertical) {
+    width: 148px;
+    margin-top: 0.4rem;
+    padding-top: 0.4rem;
+  }
+
+  @media screen and (min-width: $desktop-size) {
+    width: 200px;
+    margin-top: 0.4rem;
+    padding-top: 0;
+  }
+
+  &:hover, &:active {
+    height: 10rem;
     // padding: 1rem;
 
     box-shadow: 0 10px 20px rgba(0,0,0,0.19), 0 6px 6px rgba(0,0,0,0.23);
     background-color: var(--white);
 
     transition: height .5s, display .5s, box-shadow .5s, background-color .5s;
+
+    @media screen and (min-width: $desktop-size) {
+      height: 13rem;
+    }
 
     .profileContent {
       display: flex;
@@ -42,18 +62,27 @@
     display: flex;
     margin-left: auto;
     align-items: center;
-    margin-top: 0.6rem;
+    // margin-top: 0.6rem;
     padding: 0 1rem;
 
+    @media screen and (min-width: $desktop-size) {
+      margin-top: 0.6rem;
+    }
+
     > img {
-      width: 3.25rem;
-      height: 3.25rem;
+      width: 2.5rem;
+      height: 2.5rem;
       object-fit: cover;
 
       border: 1px solid var(--grafite);
       border-radius: 100%;
 
       margin-left: 1rem;
+
+      @media screen and (min-width: $desktop-size) {
+        width: 3.25rem;
+        height: 3.25rem;
+      }
     }
 
     > span {
@@ -106,12 +135,19 @@
         svg {
           width: 1.75rem;
           height: 1.75rem;
-
-          margin-right: 1rem;
         }
 
         span {
-          font-size: 1.25rem;
+          font-size: 1rem;
+          margin-left: 1rem;
+
+          @media screen and (min-width: $tablet_vertical){
+            font-size: 1.1rem;
+          }
+
+          @media screen and (min-width: $desktop-small-size) {
+            font-size: 1.25rem;
+          }
         }
 
         &:hover {

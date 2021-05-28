@@ -107,10 +107,6 @@ const SignIn: React.FC = () => {
               placeholder="Digite sua senha"
             />
 
-            <Link href="/forgot-password">
-              <a>Esqueci minha senha</a>
-            </Link>
-
             <Button type="submit" className={styles.buttonStyle}>
               {
                 !isLoading ?
@@ -119,6 +115,10 @@ const SignIn: React.FC = () => {
                   <div className={styles.dotFlashing} />
               }
             </Button>
+
+            <Link href="/forgot-password">
+              <a>Esqueci minha senha</a>
+            </Link>
 
             {/* <Link to="/forgot-password">Esqueci minha senha</Link> */}
           </Form>

@@ -21,6 +21,7 @@ const AttachButton: React.FC<AttachButtonProps> = ({ name, title, placeholder, i
   const formRef = useRef<FormHandles>(null);
 
   const [openTooltip, setOpenTooltip] = useState(false);
+  const [toolTipYOffset, setToolTipYOffset] = useState(0);
 
   const inputRef = useRef<HTMLInputElement>(null);
   // const { fieldName, defaultValue, error, registerField } = useField(name);
@@ -39,17 +40,23 @@ const AttachButton: React.FC<AttachButtonProps> = ({ name, title, placeholder, i
 
   return (
     <div className={styles.container}>
-      <button onClick={handleTooltip}>
+      <button onClick={(e) => {
+        handleTooltip()
+        setToolTipYOffset(e.clientY)
+      }}>
         <FiPaperclip />
         {isAttached ? <span>{attachedText}</span> : <span>{unattachedText}</span>}
       </button>
       {openTooltip && (
-        <Tooltip title={title} closeTooltip={handleTooltip}>
-          <Form ref={formRef} onSubmit={handleAttachment}>
+        <Tooltip title={title} closeTooltip={handleTooltip} offsetY={toolTipYOffset}>
+          <Form ref={formRef} onSubmit={(d, h, e) => {
+            setOpenTooltip(false);
+            handleAttachment(d, h, e);
+          }}>
             <div className={styles.attachment}>
               <div className={styles.attachmentInput}>
                 <FiPaperclip />
-                <input name={name} placeholder={placeholder} ref={inputRef} />
+                <input name={name} placeholder={placeholder} ref={inputRef} autoComplete='off' autoCorrect='off' />
               </div>
 
               <button type='submit'>Confirmar</button>

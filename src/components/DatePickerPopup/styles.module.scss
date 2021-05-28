@@ -3,7 +3,7 @@
   z-index: 9;
 
   display: flex;
-  width: 11rem;
+  width: 13rem;
   // height: 12.5rem;
   padding: 0.75rem;
 
@@ -45,13 +45,13 @@
 
     > span {
       cursor: pointer;
-      font-size: 0.8rem;
+      font-size: 1rem;
       font-weight: lighter;
       color: var(--gray-400);
 
       transition: color 0.4s;
 
-      margin-top: 0.4rem;
+      margin-top: 1rem;
 
       &:hover {
         color: var(--white);

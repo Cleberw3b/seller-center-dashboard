@@ -1,4 +1,4 @@
-import React, { useCallback, useRef, useState } from 'react';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/router';
 
 import BulletedButton from '../../../components/BulletedButton';
@@ -24,6 +24,16 @@ function Import() {
 
   const router = useRouter();
 
+  const { width } = useMemo(() => {
+    if (typeof window !== 'undefined') {
+      return { width: window.innerWidth }
+    }
+
+    return {
+      width: undefined
+    }
+  }, [process.browser]);
+
   const handleFileUpload = useCallback((uploads: File[]) => {
     setFiles(uploads);
   }, [files]);
@@ -41,7 +51,7 @@ function Import() {
     <main className={styles.importContainer}>
       <section className={styles.importHeader}>
         <BulletedButton
-          onClick={() => { router.push('/products') }}>
+          onClick={() => { router.push((!!width && width < 768) ? "/products-mobile" : "/products") }}>
           Meus produtos
         </BulletedButton>
         <BulletedButton

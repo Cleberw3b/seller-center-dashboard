@@ -1,13 +1,14 @@
+@import '../../../public/styles/_dimensions';
+
 .openMenu {
   height: 100vh;
-  margin-left: 14rem;
 
   transition: margin-left 0.5s;
   transition-delay: 0.2s;
 
   overflow: hidden;
 
-  @media(min-width: 1400px) {
+  @media screen and (min-width: $tablet_vertical) {
     margin-left: 15rem;
   }
 }

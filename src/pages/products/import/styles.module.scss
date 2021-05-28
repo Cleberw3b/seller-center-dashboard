@@ -1,3 +1,5 @@
+@import '../../../../public/styles/_dimensions';
+
 @keyframes spin {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
@@ -5,6 +7,7 @@
 
 .importContainer {
   min-height: 100%;
+
   display: flex;
   flex-direction: column;
 
@@ -12,6 +15,8 @@
   padding-left: 2.5rem;
 
   .importHeader {
+    min-height: 3rem;
+
     display: flex;
     flex-direction: row;
 
@@ -30,12 +35,18 @@
   }
 
   .importContent{
-    max-width: 90%;
-
     display: flex;
-    flex-direction: row;
+    flex-direction: column;
 
     overflow: auto;
+
+    padding: 1rem;
+
+    @media screen and (min-width: $tablet-vertical) {
+      max-width: 90%;
+
+      flex-direction: row;
+    }
 
     h3 {
       font-size: 1.2rem;
@@ -62,8 +73,6 @@
       display: flex;
       flex-direction: column;
 
-      margin-right: 1rem;
-
       padding: 1rem;
 
       background-color: var(--white);
@@ -71,6 +80,10 @@
       border-radius: 6px;
 
       box-shadow: 0 3px 6px rgba(0,0,0,0.02), 0 3px 10px rgba(0,0,0,0.06);
+
+      @media screen and (min-width: $tablet-vertical) {
+        margin-right: 1rem;
+      }
 
       > svg {
         width: 4rem;
@@ -80,8 +93,13 @@
         margin-bottom: 1rem;
       }
 
+      p {
+        margin-bottom: 1rem;
+      }
+
       button {
-        width: 10rem;
+        // width: 10rem;
+
         padding: 0.75rem;
 
         background-color: var(--grafite);
@@ -101,9 +119,13 @@
       display: flex;
       flex-direction: column;
 
-      margin-left: 1rem;
-
+      margin-top: 1.5rem;
       padding: 1rem;
+
+      @media screen and (min-width: $tablet-vertical) {
+        margin-top: 0;
+        margin-left: 1rem;
+      }
 
       background-color: var(--yellow-50);
       border-radius: 6px;

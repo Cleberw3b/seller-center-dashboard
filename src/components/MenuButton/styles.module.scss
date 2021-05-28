@@ -1,26 +1,42 @@
+@import '../../../public/styles/_dimensions';
+
 .menuButton {
-    display: flex;
-    flex-direction: column;
-    justify-content: space-around;
+  width: 2.5rem;
+  height: 2.5rem;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+
+  align-items: center;
+
+  transition: width 0.2s, height 0.2s;
+
+  @media screen and (min-width: $desktop-small-size) {
     width: 4rem;
     height: 4rem;
-    background: transparent;
-    border: none;
-    cursor: pointer;
-    padding: 0;
-    z-index: 10;
+  }
 
-    align-items: center;
+  > svg {
+    width: 2.5rem;
+    height: 2.5rem;
 
-    transition: width 0.2s, height 0.2s;
+    transition: color 0.5s;
 
-    svg {
-      transition: color 0.5s;
+    @media screen and (min-width: $desktop-small-size) {
+      width: 2.75rem;
+      height: 2.75rem;
     }
+  }
 
-    &:hover {
-      svg {
-        color: var(--yellow-300);
-      }
+  &:hover {
+    > svg {
+      color: var(--yellow-300);
     }
+  }
 }

@@ -91,7 +91,7 @@ export function ProductEdit() {
   }, [filesUrl])
 
   const calcTotalFields = useCallback((data: Product) => {
-    setTotalFields(9 + data.variations?.length * 4);
+    setTotalFields(9 + data.variations?.length * 3);
   }, [totalFields]);
 
   const calcFilledFields = useCallback((data: Product) => {
@@ -240,7 +240,7 @@ export function ProductEdit() {
   }, [router])
 
   return (
-    <div className={styles.wrapper}>
+    <>
       <main className={styles.container}>
         <section className={styles.header}>
           <Button
@@ -361,9 +361,9 @@ export function ProductEdit() {
 
       <div className={styles.footerContainer}>
         <span>{filledFields}/{totalFields} Informações inseridas</span>
-        <Button type='submit' onClick={() => { formRef.current?.submitForm() }}>Cadastrar produto</Button>
+        <Button type='submit' onClick={() => { formRef.current?.submitForm() }}>Salvar produto</Button>
       </div>
-    </div>
+    </>
   );
 }
 

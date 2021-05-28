@@ -1,3 +1,5 @@
+@import '../../../public/styles/_dimensions';
+
 .panelItemContainer {
   flex: 1;
   display: flex;
@@ -36,8 +38,16 @@
   }
 
   span {
-    font-size: 1.25rem;
+    font-size: 1rem;
     font-weight: bold;
+
+    @media screen and (min-width: $tablet_vertical) {
+      font-size: 1.1rem;
+    }
+
+    @media screen and (min-width: $desktop-small-size) {
+      font-size: 1.25rem;
+    }
   }
 
   .green {
