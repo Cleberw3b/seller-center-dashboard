@@ -10,12 +10,15 @@
  }
 
 .container{
-  height: calc(100vh - 6rem);
+  height: calc(100vh - 4rem);
 
   @media screen and (min-width: $desktop-small-size) {
     height: calc(100vh - 5rem);
   }
 
+  @media screen and (min-width: $desktop-size) {
+    height: calc(100vh - 6rem);
+  }
 
   display: flex;
   flex-direction: column;
@@ -26,16 +29,31 @@
   // padding-left: 2.5rem;
 
   .header {
-    display: grid;
-    grid-template-columns: 1fr 1fr 1fr 1fr 1fr .5fr;
-    column-gap: 1rem;
+    min-height: 3rem;
+
+    display: flex;
+
+    button + button {
+      margin-left: 2rem;
+    }
+
+    @media screen and (min-width: $tablet_vertical) {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr 1fr 1fr .5fr;
+      column-gap: 1.5rem;
+
+      button + button {
+        margin-left: 0;
+      }
+    }
 
     @media screen and (min-width: $desktop-size) {
       display: flex;
       flex-direction: row;
+      column-gap: 0;
 
       button + button {
-        margin-left: 2rem;
+        margin-left: 1.5rem;
       }
     }
 
