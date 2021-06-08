@@ -41,8 +41,7 @@ export type Product = {
   weight?: number,
 
   variations: {
-    type: 'number' | 'size',
-    value: number | string,
+    size: number | string,
     stock: number,
     color: string,
   }[],
@@ -79,7 +78,7 @@ export function ProductForm() {
   const [filesUrl, setFilesUrl] = useState<string[]>([]);
 
   const [filledFields, setFilledFields] = useState(0);
-  const [totalFields, setTotalFields] = useState(10 + (3 * 4));
+  const [totalFields, setTotalFields] = useState(13);
 
   const formRef = useRef<FormHandles>(null);
 
@@ -101,8 +100,13 @@ export function ProductForm() {
   }, [filesUrl])
 
   const calcTotalFields = useCallback((data: Product) => {
-    setTotalFields(9 + data.variations?.length * 3);
-  }, [totalFields]);
+    if (!!data.variations) {
+      setTotalFields(10 + data.variations?.length * 3);
+      return;
+    }
+
+    setTotalFields(13);
+  }, [totalFields, filledFields]);
 
   const calcFilledFields = useCallback((data: Product) => {
     console.log(data);
@@ -133,7 +137,7 @@ export function ProductForm() {
       filled++;
 
     data.variations.forEach(variation => {
-      !!variation.type && filled++;
+      !!variation.size && filled++;
       !!variation.stock && filled++;
       !!variation.color && filled++;
     })
@@ -142,6 +146,10 @@ export function ProductForm() {
   }, [filesUrl, filledFields, totalFields])
 
   const handleSubmit = useCallback(async (data: Product) => {
+
+    if (filledFields < totalFields) {
+      return;
+    }
 
     try {
       formRef.current?.setErrors({});
@@ -160,15 +168,15 @@ export function ProductForm() {
         length: Yup.string(),
         weight: Yup.string(),
         variations: Yup.array().required().of(Yup.object().shape({
-          type: Yup.string().equals(['number', 'size']),
-          size: Yup.mixed().when('type', {
-            is: (val: 'number' | 'size') => val === 'number',
-            then: Yup.number().required('Campo obrigatório'),
-            otherwise: Yup.string().required('Campo obrigatório'),
-          }),
+          // type: Yup.string().equals(['number', 'size']),
+          // size: Yup.mixed().when('type', {
+          //   is: (val: 'number' | 'size') => val === 'number',
+          //   then: Yup.number().required('Campo obrigatório'),
+          //   otherwise: Yup.string().required('Campo obrigatório'),
+          // }),
+          size: Yup.string().required('Campo obrigatório'),
           color: Yup.string().required('Campo obrigatório'),
           stock: Yup.number().typeError('Campo obrigatório').required('Campo obrigatório').min(0, 'Valor mínimo 0'),
-          price: Yup.number().typeError('Campo obrigatório').required('Campo obrigatório'),
         })),
 
         // password: Yup.string().when('old_password', {

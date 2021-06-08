@@ -17,26 +17,38 @@ import Button from '../../components/PrimaryButton';
 import AvatarInput from '../../components/AvatarInput';
 
 type ProfileFormData = {
-  address: string,
-  birthday: Date,
-  block: string,
-  role: string,
-  city: string,
-  commission: number,
-  complement: string,
-  cpf: string,
-  email: string,
   name: string,
-  number: number,
-  phone: string,
+  lastName: string,
+  cpf: string,
   rg: string,
+  birthday: Date,
+
+  cep: string,
+  address: string,
+  number: number,
+  complement: string,
+  district: string,
+  city: string,
+
+  email: string,
+  phone: string,
+
+  // commission: number,
+  // role: string,
+
+  bank: string,
+  account: string,
+  agency: string,
+
   store: {
-    address: string,
-    block: string,
-    city: string,
+    name: string,
     cnpj: string,
-    complement: string,
-    number: number,
+
+    // address: string,
+    // district: string,
+    // city: string,
+    // complement: string,
+    // number: number,
   }
 }
 
@@ -61,14 +73,16 @@ const Profile: React.FC = () => {
 
         const schema = Yup.object().shape({
           name: Yup.string().required('Nome obrigatório'),
+          lastName: Yup.string().required('Sobrenome obrigatório'),
           email: Yup.string()
             .required('E-mail obrigatório')
             .email('Digite um e-mail válido'),
           phone: Yup.string().required('Celular obrigatório').min(11, 'O celular deve ter os 11 digitos'),
-          cpf: Yup.string().required('CPF obrigatório').min(11, 'O CPF deve ser preenchido completamente'),
-          rg: Yup.string().required('RG obrigatório').min(9, 'RG deve ser preenchido completamente'),
+          cpf: Yup.string().required('CPF obrigatório').min(11, 'O CPF deve ter 11 digitos'),
+          rg: Yup.string().required('RG obrigatório').min(9, 'RG deve ter 9 digitos'),
           birthday: Yup.date(),
-          address: Yup.string(),
+          cep: Yup.string().required('CEP deve ser preenchido').min(8, 'CEP deve ter 8 digitos'),
+          address: Yup.string().required('Endereço deve ser preenchido'),
           number: Yup.mixed()
             .when('address', {
               is: (val: string) => !!val.length,
@@ -76,7 +90,7 @@ const Profile: React.FC = () => {
               otherwise: Yup.string()
             }),
           complement: Yup.string(),
-          block: Yup.string()
+          district: Yup.string()
             .when('address', {
               is: (val: string) => !!val.length,
               then: Yup.string().required('Bairro obrigaório'),
@@ -88,47 +102,86 @@ const Profile: React.FC = () => {
               then: Yup.string().required('Cidade obrigaória'),
               otherwise: Yup.string()
             }),
-          comission: Yup.number().required('Comissão obrigatória').min(0, 'Não pode ser inferior a 0').max(99, 'Máximo de 99%'),
-          category: Yup.string().required('Categoria obrigatória'),
+          bank: Yup.string().min(3, 'O banco deve ter pelo menos 3 digitos').required('Banco obrigatório'),
+          account: Yup.string().min(6, 'A conta deve ter pelo menos 6 digitos').required('Conta obrigatório'),
+          agency: Yup.string().min(5, 'A agência deve ter pelo menos 5 digitos').required('Agência obrigatório'),
+          // comission: Yup.number().required('Comissão obrigatória').min(0, 'Não pode ser inferior a 0').max(99, 'Máximo de 99%'),
+          // category: Yup.string().required('Categoria obrigatória'),
           store: Yup.object().shape({
-            cnpj: Yup.string().required('CNPJ obrigatório'),
-            address: Yup.string(),
-            number: Yup.mixed()
-              .when('address', {
-                is: (val: string) => !!val.length,
-                then: Yup.number().required('Número obrigaório'),
-                otherwise: Yup.string()
-              }),
-            complement: Yup.string(),
-            block: Yup.string()
-              .when('address', {
-                is: (val: string) => !!val.length,
-                then: Yup.string().required('Bairro obrigaório'),
-                otherwise: Yup.string()
-              }),
-            city: Yup.string()
-              .when('address', {
-                is: (val: string) => !!val.length,
-                then: Yup.string().required('Cidade obrigaória'),
-                otherwise: Yup.string()
-              }),
+            cnpj: Yup.string().required('CNPJ obrigatório').min(11, 'O CPF deve ter 11 digitos'),
+            name: Yup.string().required('Nome obrigatório'),
+            // address: Yup.string(),
+            // number: Yup.mixed()
+            //   .when('address', {
+            //     is: (val: string) => !!val.length,
+            //     then: Yup.number().required('Número obrigaório'),
+            //     otherwise: Yup.string()
+            //   }),
+            // complement: Yup.string(),
+            // block: Yup.string()
+            //   .when('address', {
+            //     is: (val: string) => !!val.length,
+            //     then: Yup.string().required('Bairro obrigaório'),
+            //     otherwise: Yup.string()
+            //   }),
+            // city: Yup.string()
+            //   .when('address', {
+            //     is: (val: string) => !!val.length,
+            //     then: Yup.string().required('Cidade obrigaória'),
+            //     otherwise: Yup.string()
+            //   }),
           })
         });
         await schema.validate(data, { abortEarly: false });
 
         const {
           name,
-          email,
+          lastName,
+          cpf,
+          rg,
+          birthday,
+          cep,
+          address,
+          city,
+          complement,
+          district,
+          number,
+          bank,
+          account,
+          agency
         } = data;
 
-        const formData = {
-          name,
-          email,
+        const personalInfo = {
+          userId: user.id,
+          firstName: name,
+          lastName,
+          cpf,
+          rg,
+          birthday,
         };
 
-        // const response = await api.put('/profile', formData);
+        const addressInfo = {
+          userId: user.id,
+          cep,
+          address,
+          city,
+          complement,
+          district,
+          number
+        };
 
-        // updateUser(response.data);
+        const bankInfo = {
+          userId: user.id,
+          bank,
+          account,
+          agency
+        };
+
+        const personalResponse = await api.post('/account/personalInfo', personalInfo);
+        const addressResponse = await api.post('/account/address', addressInfo);
+        const bankResponse = await api.post('/account/bankInfo', bankInfo);
+
+        updateUser({ ...personalResponse.data, ...addressResponse.data, ...bankResponse.data });
 
         // history.push('/dashboard');
 
@@ -214,6 +267,12 @@ const Profile: React.FC = () => {
               />
 
               <Input
+                name='lastName'
+                placeholder='Sobrenome'
+                autoComplete='off'
+              />
+
+              <Input
                 name='birthday'
                 placeholder='Date de Nascimento'
                 autoComplete='off'
@@ -255,6 +314,38 @@ const Profile: React.FC = () => {
               <h3>Seus dados de vendedor</h3>
 
               <Input
+                name='bank'
+                placeholder='Banco'
+                autoComplete='off'
+                isMasked
+                mask={'999'}
+              />
+
+              <Input
+                name='account'
+                placeholder='Conta'
+                autoComplete='off'
+                isMasked
+                mask={'99999-9'}
+              />
+
+              <Input
+                name='agency'
+                placeholder='Agencia'
+                autoComplete='off'
+                isMasked
+                mask={'9999-9'}
+              />
+
+              <Input
+                name='cep'
+                placeholder='CEP'
+                autoComplete='off'
+                isMasked
+                mask={'99999-999'}
+              />
+
+              <Input
                 name='address'
                 placeholder='Endereço'
                 autoComplete='off'
@@ -288,7 +379,7 @@ const Profile: React.FC = () => {
                 autoComplete='off'
               />
 
-              <Input
+              {/* <Input
                 name='commission'
                 placeholder='Taxa de Comissão'
                 isMasked
@@ -299,12 +390,19 @@ const Profile: React.FC = () => {
                 name='role'
                 placeholder='Categoria'
                 autoComplete='off'
-              />
+              /> */}
 
             </div>
             <Scope path='store'>
               <div className={styles.store}>
                 <h3>Os dados da sua loja</h3>
+
+                <Input
+                  name='name'
+                  placeholder='Nome'
+                  autoComplete='off'
+                />
+
                 <Input
                   name='cnpj'
                   placeholder='CNPJ'
@@ -313,7 +411,7 @@ const Profile: React.FC = () => {
                   mask={'99.999.999.9999-99'}
                 />
 
-                <Input
+                {/* <Input
                   name='address'
                   placeholder='Endereço'
                   autoComplete='off'
@@ -344,7 +442,7 @@ const Profile: React.FC = () => {
                   name='city'
                   placeholder='Cidade'
                   autoComplete='off'
-                />
+                /> */}
               </div>
             </Scope>
           </div>

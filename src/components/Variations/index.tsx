@@ -8,11 +8,9 @@ import { FaPlus } from 'react-icons/fa';
 import styles from './styles.module.scss';
 
 type Variation = {
-  type?: 'number' | 'size',
-  value?: number | string,
+  size?: number | string,
   stock?: number,
   color?: string,
-  price?: number,
 }
 
 interface VariationsControllerProps {

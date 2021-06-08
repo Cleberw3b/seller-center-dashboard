@@ -11,28 +11,37 @@ interface Token {
 }
 export interface User {
   id: string;
-  name: string;
-  email: string;
-  // password: string;
-  avatar_url: string;
-  address?: string,
-  birthday?: Date,
-  block?: string,
-  role: string,
-  city?: string,
-  commission: number,
-  complement?: string,
+  name: string,
+  lastName: string,
   cpf: string,
-  number?: number,
-  phone: string,
   rg: string,
+  birthday?: Date,
+
+  address: string,
+  number: number,
+  complement?: string,
+  district: string,
+  city: string,
+
+  email: string,
+  phone?: string,
+
+  // commission: number,
+  // role: string,
+
+  bank: string,
+  account: string,
+  agency: string,
+
   store: {
-    address?: string,
-    block?: string,
-    city?: string,
+    name: string,
     cnpj: string,
-    complement?: string,
-    number?: number,
+
+    // address: string,
+    // district: string,
+    // city: string,
+    // complement: string,
+    // number: number,
   }
 }
 
