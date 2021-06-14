@@ -1,4 +1,4 @@
-import { useMemo } from "react"
+import jwt from 'jsonwebtoken'
 
 /**
  * Call it inside an async function and it will sleep
@@ -120,4 +120,29 @@ export const isPasswordSecure = (password: string): boolean => {
   console.log(`(${strongPasswordRegex.test(password)}) - ${password}`);
 
   return strongPasswordRegex.test(password)
+}
+
+export const nowInSeconds = () => {
+  return Math.floor(Date.now() / 1000)
+}
+
+export const isTokenValid = (token: string | undefined): boolean => {
+
+  if (!token) return false
+
+  let decoded: any
+
+  try {
+    decoded = jwt.verify(token, 'lI@D2zeg$e6mKY!5', {})
+  } catch (error) {
+    if (error instanceof Error)
+      console.log(error.message, 'EVENT', 'JWT Verification', 'ERROR')
+    return false
+  }
+
+  if (!decoded || !decoded.exp) return false
+
+  const now = nowInSeconds()
+
+  return decoded.exp >= now
 }

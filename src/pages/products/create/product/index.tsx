@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/router';
 
 import { FormHandles } from '@unform/core';
@@ -17,8 +17,9 @@ import { FiChevronLeft, FiX } from 'react-icons/fi';
 
 import styles from './styles.module.scss'
 
-import { productsFromApi } from '../../index';
 import { format } from 'date-fns';
+import api from 'src/services/api';
+import { useAuth } from 'src/hooks/auth';
 
 export type Product = {
   images: {
@@ -75,6 +76,7 @@ type ProductDTO = {
 }
 
 export function ProductForm() {
+  const [files, setFiles] = useState<File[]>([]);
   const [filesUrl, setFilesUrl] = useState<string[]>([]);
 
   const [filledFields, setFilledFields] = useState(0);
@@ -83,6 +85,17 @@ export function ProductForm() {
   const formRef = useRef<FormHandles>(null);
 
   const router = useRouter();
+
+  const { user, updateUser } = useAuth();
+
+  useEffect(() => {
+    console.log(user)
+    api.get('/account').then(response => {
+      updateUser({ ...user, ...response.data })
+    }).catch(err => {
+      console.log(err)
+    });
+  }, [])
 
   const handleOnFileUpload = useCallback((file: string[]) => {
     calcFilledFields(formRef.current?.getData() as Product);
@@ -200,47 +213,44 @@ export function ProductForm() {
         nationallity
       } = router.query;
 
-      data.variations.map((v, i) => {
-        let produts = productsFromApi;
-        const produtoDTO: ProductDTO = {
-          id: produts.length.toString(),
-          status: 0,
-          name: data.name,
-          brand: data.brand,
-          sku: data.sku,
-          date: format(new Date(), 'dd/MM/yyyy'),
-          value: data.price,
-          stock: v.stock,
-          image: data.images[0].url
-        };
+      const {
+        name,
+        description,
+        brand,
+        more_info,
+        ean,
+        sku,
+        height,
+        width,
+        length,
+        weight,
+        variations
+      } = data;
 
-        produts.push(produtoDTO);
-        localStorage.setItem('@SellerCenter:items', JSON.stringify(produts));
-      })
-
-
-      // const {
-      //   name,
-      //   email,
-      //   password,
-      //   old_password,
-      //   password_confirmation,
-      // } = data;
-
-      // const formData = {
-      //   name,
-      //   email,
-      //   ...(data.old_password
-      //     ? {
-      //       old_password,
-      //       password,
-      //       password_confirmation,
-      //     }
-      //     : {}),
-      // };
+      const product = {
+        category,
+        subCategory,
+        nationallity,
+        name,
+        description,
+        brand,
+        more_info,
+        ean,
+        sku,
+        height,
+        width,
+        length,
+        weight,
+        variations,
+        images: [
+          ...files
+        ]
+      }
 
       //TODO: chamada para a API
-      // const response = await api.post('/product', formData);
+      const response = await api.post('/product', product).then(response => {
+        console.log(response.data)
+      });
 
       router.push('/products');
 
@@ -259,7 +269,7 @@ export function ProductForm() {
         return;
       }
     }
-  }, [router])
+  }, [router, filledFields, totalFields])
 
   return (
     <>
@@ -271,7 +281,7 @@ export function ProductForm() {
             icon={FiChevronLeft}
           >
             Voltar
-        </Button>
+          </Button>
         </section>
         <div className={styles.divider} />
         <section className={styles.content}>
@@ -281,7 +291,14 @@ export function ProductForm() {
           }}>
             <p className={styles.imagesTitle}>Seleciones as fotos do produto</p>
             <div className={styles.imagesContainer}>
-              <Dropzone name='images' filesUrl={filesUrl} setFilesUrl={setFilesUrl} onFileUploaded={(files) => handleOnFileUpload(files)}></Dropzone>
+              <Dropzone
+                name='images'
+                filesUrl={filesUrl}
+                setFilesUrl={setFilesUrl}
+                onFileUploaded={(files) => handleOnFileUpload(files)}
+                files={files}
+                setFiles={setFiles}
+              />
               {
                 filesUrl.map((file, i) => (
                   <ImageCard key={i} onClick={() => handleDeleteFile(file)} imgUrl={file} />

@@ -7,6 +7,8 @@ import { Header } from '../Header';
 import styles from './styles.module.scss';
 import { useAuth } from '../../hooks/auth';
 import { useRouter } from 'next/router';
+import api from 'src/services/api';
+import { isTokenValid } from 'src/utils/util';
 
 const Layout: React.FC = ({ children }) => {
   const { width } = useMemo(() => {
@@ -22,7 +24,7 @@ const Layout: React.FC = ({ children }) => {
 
   const [open, setOpen] = useState(true);
 
-  const { user, isRegisterCompleted } = useAuth();
+  const { user, isRegisterCompleted, signOut, token } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
@@ -32,6 +34,25 @@ const Layout: React.FC = ({ children }) => {
   useEffect(() => {
     if (!user) {
       router.push('/');
+    }
+
+    if (!isTokenValid(token)) {
+      api.get(`auth/token/${token}`).then(response => {
+        const { isValid } = response.data;
+
+        if (!isValid) {
+          signOut();
+          router.push('/');
+          return;
+        }
+
+      }).catch((error) => {
+        signOut();
+        router.push('/');
+        return;
+      })
+
+      return;
     }
 
     if (!isRegisterCompleted && !router.pathname.includes('profile')) {

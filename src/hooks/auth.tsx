@@ -10,30 +10,37 @@ interface Token {
   data: User;
 }
 export interface User {
-  id: string;
-  name: string,
-  lastName: string,
-  cpf: string,
-  rg: string,
-  birthday?: Date,
-
-  address: string,
-  number: number,
-  complement?: string,
-  district: string,
-  city: string,
-
   email: string,
-  phone?: string,
+
+  personalInfo: {
+    firstName: string,
+    lastName: string,
+    cpf: string,
+    rg: string,
+    birthday?: string,
+  }
+
+  address: {
+    address: string,
+    number: number,
+    complement?: string,
+    district: string,
+    city: string,
+  }
+
+  // phone?: string,
 
   // commission: number,
   // role: string,
 
-  bank: string,
-  account: string,
-  agency: string,
+  bankInfo: {
+    bank: string,
+    account: string,
+    agency: string,
+  }
 
-  store: {
+  shopInfo: {
+    _id: string,
     name: string,
     cnpj: string,
 
@@ -57,6 +64,7 @@ interface SignInCredentials {
 
 interface AuthContextData {
   user: User;
+  token: string;
   signIn(credentials: SignInCredentials): Promise<void>;
   signOut(): void;
   updateUser(user: User): void;
@@ -73,7 +81,11 @@ const AuthProvider: React.FC = ({ children }) => {
       const user = localStorage.getItem('@SellerCenter:user');
 
       if (token && user) {
-        api.defaults.headers.authorization = `Bearer ${token}`;
+
+        api.defaults.headers.authorization = token;
+
+        const decodedToken = jwt_decode(token) as Token;
+        console.log(decodedToken);
 
         return { token, user: JSON.parse(user) };
       }
@@ -88,6 +100,7 @@ const AuthProvider: React.FC = ({ children }) => {
 
     //const { token, user } = response.data;
     const { token } = response.data;
+
     const decodedToken = jwt_decode(token) as Token;
 
     const user = decodedToken.data as User;
@@ -95,7 +108,7 @@ const AuthProvider: React.FC = ({ children }) => {
     localStorage.setItem('@SellerCenter:token', token);
     localStorage.setItem('@SellerCenter:user', JSON.stringify(user));
 
-    api.defaults.headers.authorization = `Bearer ${token}`;
+    api.defaults.headers.authorization = token;
 
     setData({ token, user });
   }, []);
@@ -131,7 +144,7 @@ const AuthProvider: React.FC = ({ children }) => {
       localStorage.setItem('@SellerCenter:token', apiToken.token);
       localStorage.setItem('@SellerCenter:user', JSON.stringify(user));
 
-      api.defaults.headers.authorization = `Bearer ${apiToken.token}`;
+      api.defaults.headers.authorization = apiToken.token;
 
       setData({ token: apiToken.token, user });
 
@@ -143,7 +156,7 @@ const AuthProvider: React.FC = ({ children }) => {
 
   const isRegisterCompleted = useMemo(() => {
     if (!!data.user) {
-      //return !!data.user.name && !!data.user.cpf && !!data.user.rg && !!data.user.phone
+      // return !!data.user.name && !!data.user.cpf && !!data.user.rg
     }
 
     return true
@@ -151,7 +164,7 @@ const AuthProvider: React.FC = ({ children }) => {
 
   return (
     <AuthContext.Provider
-      value={{ user: data.user, signIn, signOut, updateUser, verifyUser, isRegisterCompleted }}
+      value={{ user: data.user, token: data.token, signIn, signOut, updateUser, verifyUser, isRegisterCompleted }}
     >
       {children}
     </AuthContext.Provider>

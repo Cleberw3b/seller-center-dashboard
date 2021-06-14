@@ -10,6 +10,8 @@ interface Props {
   onFileUploaded: (file: string[]) => void;
   filesUrl: string[];
   setFilesUrl: React.Dispatch<React.SetStateAction<string[]>>;
+  files: File[];
+  setFiles: React.Dispatch<React.SetStateAction<File[]>>;
 }
 
 interface InputRefProps extends HTMLInputElement {
@@ -17,7 +19,7 @@ interface InputRefProps extends HTMLInputElement {
 }
 
 // TODO: Passar a lista de imagens para dentro deste componente (externalizar como outro componente se preicsar)
-const Dropzone: React.FC<Props> = ({ name, onFileUploaded, filesUrl, setFilesUrl }) => {
+const Dropzone: React.FC<Props> = ({ name, onFileUploaded, filesUrl, setFilesUrl, files, setFiles }) => {
   // const [selectedFileUrl, setselectedFileUrl] = useState<string[]>([]);
   const [err, setErr] = useState();
 
@@ -31,11 +33,12 @@ const Dropzone: React.FC<Props> = ({ name, onFileUploaded, filesUrl, setFilesUrl
         // const file = acceptedFiles[0];
 
         // if (!filesUrl.includes(file)) {
-        let files = acceptedFiles.map((file: File) => URL.createObjectURL(file))
+        setFiles([...files, ...acceptedFiles]);
+        let f = acceptedFiles.map((file: File) => URL.createObjectURL(file))
 
-        dropZoneRef.current.acceptedFiles = [...filesUrl, ...files];
-        setFilesUrl([...filesUrl, ...files]);
-        onFileUploaded(files);
+        dropZoneRef.current.acceptedFiles = [...filesUrl, ...f];
+        setFilesUrl([...filesUrl, ...f]);
+        onFileUploaded(f);
         // }
       }
 
@@ -45,7 +48,7 @@ const Dropzone: React.FC<Props> = ({ name, onFileUploaded, filesUrl, setFilesUrl
         setErr(undefined);
       }, 3000);
     }
-  }, [filesUrl, onFileUploaded])
+  }, [files, filesUrl, onFileUploaded])
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
@@ -92,10 +95,10 @@ const Dropzone: React.FC<Props> = ({ name, onFileUploaded, filesUrl, setFilesUrl
           !!err ?
             <p className='error'>
               <FiAlertCircle />
-            Erro com o arquivo selecionado
-            <br />
-            Tente novamente
-          </p>
+              Erro com o arquivo selecionado
+              <br />
+              Tente novamente
+            </p>
             :
             isDragActive ?
               <p>

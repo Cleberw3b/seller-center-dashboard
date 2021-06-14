@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { GetStaticProps } from "next";
+// import GetInitialProps from "next";
 import { FormHandles } from '@unform/core';
 import { Form } from '@unform/web';
 import { isSameDay, isSameWeek, isSameMonth, parse, format } from 'date-fns';
@@ -16,6 +16,8 @@ import styles from './styles.module.scss';
 import switchStyles from './switch-styles.module.scss';
 
 import { MuiThemeProvider, createMuiTheme } from '@material-ui/core';
+import api from 'src/services/api';
+import { useAuth, User } from 'src/hooks/auth';
 
 enum ProductStatus {
   Ativado = 0,
@@ -39,7 +41,7 @@ interface SearchFormData {
 }
 
 interface ProductsProps {
-  products: Product[];
+  userFromApi: User;
 }
 
 const theme = createMuiTheme({
@@ -53,10 +55,17 @@ const theme = createMuiTheme({
   },
 });
 
-export function Products({ }: ProductsProps) {
+export function Products({ userFromApi }: ProductsProps) {
+  const [products, setProducts] = useState([] as Product[]);
   const [items, setItems] = useState([] as Product[]);
   const [search, setSeacrh] = useState('');
   const [loading, setLoading] = useState(false);
+
+  const { token, user, updateUser } = useAuth();
+
+  useEffect(() => {
+    !!userFromApi && updateUser({ ...user, shopInfo: { ...user.shopInfo, _id: userFromApi.shopInfo._id } })
+  }, [userFromApi])
 
   const { width } = useMemo(() => {
     if (typeof window !== 'undefined') {
@@ -68,26 +77,12 @@ export function Products({ }: ProductsProps) {
     }
   }, [process.browser]);
 
-  let products: Product[] = [];
-
   // const itemsRef = useMemo(() => Array(items.length).fill(0).map(i => React.createRef<HTMLInputElement>()), [items]);
 
   const formRef = useRef<FormHandles>(null);
   const [error, setError] = useState('');
 
   const router = useRouter();
-
-  useEffect(() => {
-    const items = localStorage.getItem('@SellerCenter:items');
-
-    if (!items) {
-      localStorage.setItem('@SellerCenter:items', JSON.stringify(productsFromApi));
-      products = productsFromApi;
-      return;
-    }
-
-    products = JSON.parse(items);
-  }, [products])
 
   useEffect(() => {
     setLoading(true);
@@ -100,6 +95,19 @@ export function Products({ }: ProductsProps) {
     setLoading(false);
   }, [search]);
 
+  useEffect(() => {
+    api.get('/product', {
+      headers: {
+        authorization: token,
+        shop_id: user.shopInfo._id,
+      }
+    }).then(response => {
+      setProducts(response.data)
+    }).catch((error) => {
+      console.log(error)
+      setProducts([]);
+    })
+  }, [user]);
 
   const handleSubmit = useCallback(
     async (data: SearchFormData) => {
@@ -254,190 +262,16 @@ export function Products({ }: ProductsProps) {
   )
 }
 
-export let productsFromApi: Product[] = [
-  {
-    id: '1',
-    status: ProductStatus.Ativado,
-    name: 'Moletom Candy Bloomer...',
-    brand: 'Balenciaga',
-    sku: '3333333',
-    date: format(new Date(), 'dd/MM/yyyy'),
-    value: 299.90,
-    stock: 23,
-    image: 'https://images-americanas.b2w.io/produtos/01/00/img/2608684/5/2608684535_1GG.jpg'
-  },
-  {
-    id: '2',
-    status: ProductStatus.Ativado,
-    name: 'Moletom Candy Bloomer...',
-    brand: 'Balenciaga',
-    sku: '3333333',
-    date: format(new Date(), 'dd/MM/yyyy'),
-    value: 299.90,
-    stock: 23,
-    image: 'https://images-americanas.b2w.io/produtos/01/00/img/2608684/5/2608684535_1GG.jpg'
-  },
-  {
-    id: '3',
-    status: ProductStatus.Ativado,
-    name: 'Moletom Candy Bloomer...',
-    brand: 'Balenciaga',
-    sku: '3333333',
-    date: format(new Date(), 'dd/MM/yyyy'),
-    value: 299.90,
-    stock: 0,
-    image: ''
-  },
-  {
-    id: '4',
-    status: ProductStatus.Ativado,
-    name: 'Moletom Candy Bloomer...',
-    brand: 'Balenciaga',
-    sku: '3333333',
-    date: format(new Date(), 'dd/MM/yyyy'),
-    value: 299.90,
-    stock: 0,
-    image: ''
-  },
-  {
-    id: '5',
-    status: ProductStatus.Ativado,
-    name: 'Moletom Candy Bloomer...',
-    brand: 'Balenciaga',
-    sku: '3333333',
-    date: '01/04/2021',
-    value: 299.90,
-    stock: 0,
-    image: ''
-  },
-  {
-    id: '6',
-    status: ProductStatus.Ativado,
-    name: 'Moletom Candy Bloomer...',
-    brand: 'Balenciaga',
-    sku: '3333333',
-    date: '01/04/2021',
-    value: 299.90,
-    stock: 23,
-    image: ''
-  },
-  {
-    id: '7',
-    status: ProductStatus.Ativado,
-    name: 'Moletom Candy Bloomer...',
-    brand: 'Balenciaga',
-    sku: '3333333',
-    date: '01/04/2021',
-    value: 299.90,
-    stock: 23,
-    image: ''
-  },
-  {
-    id: '8',
-    status: ProductStatus.Ativado,
-    name: 'Moletom Candy Bloomer...',
-    brand: 'Balenciaga',
-    sku: '3333333',
-    date: '01/04/2021',
-    value: 299.90,
-    stock: 23,
-    image: ''
-  },
-  {
-    id: '9',
-    status: ProductStatus.Ativado,
-    name: 'Moletom Candy Bloomer...',
-    brand: 'Balenciaga',
-    sku: '3333333',
-    date: '01/04/2021',
-    value: 299.90,
-    stock: 23,
-    image: ''
-  },
-  {
-    id: '10',
-    status: ProductStatus.Ativado,
-    name: 'Moletom Candy Bloomer...',
-    brand: 'Balenciaga',
-    sku: '3333333',
-    date: '01/04/2021',
-    value: 299.90,
-    stock: 23,
-    image: ''
-  },
-  {
-    id: '11',
-    status: ProductStatus.Ativado,
-    name: 'Moletom Candy Bloomer...',
-    brand: 'Balenciaga',
-    sku: '3333333',
-    date: '01/04/2021',
-    value: 299.90,
-    stock: 23,
-    image: ''
-  },
-  {
-    id: '12',
-    status: ProductStatus.Ativado,
-    name: 'Moletom Candy Bloomer...',
-    brand: 'Balenciaga',
-    sku: '3333333',
-    date: '04/04/2021',
-    value: 299.90,
-    stock: 23,
-    image: ''
-  },
-  {
-    id: '13',
-    status: ProductStatus.Desativado,
-    name: 'Moletom Candy Bloomer...',
-    brand: 'Balenciaga',
-    sku: '3333333',
-    date: '01/04/2021',
-    value: 299.90,
-    stock: 0,
-    image: ''
-  },
-  {
-    id: '14',
-    status: ProductStatus.Desativado,
-    name: 'Moletom Candy Bloomer...',
-    brand: 'Balenciaga',
-    sku: '3333333',
-    date: '04/04/2021',
-    value: 299.90,
-    stock: 0,
-    image: ''
-  },
-  {
-    id: '15',
-    status: ProductStatus.Desativado,
-    name: 'Moletom Candy Bloomer...',
-    brand: 'Balenciaga',
-    sku: '3333333',
-    date: '01/04/2021',
-    value: 299.90,
-    stock: 23,
-    image: ''
-  },
-  {
-    id: '16',
-    status: ProductStatus.Desativado,
-    name: 'Moletom Candy Bloomer...',
-    brand: 'Balenciaga',
-    sku: '3333333',
-    date: '04/04/2021',
-    value: 299.90,
-    stock: 23,
-    image: ''
-  },
-]
-
-export const getStaticProps: GetStaticProps = async () => {
+export const getInitialProps = async () => {
+  const user = api.get('/account/detail').then(response => {
+    return response.data as User;
+  }).catch(err => {
+    console.log(err)
+  });
 
   return ({
     props: {
-      products: productsFromApi,
+      userFromApi: user
     },
     revalidate: 10
   });

@@ -1,6 +1,6 @@
 import { useField } from '@unform/core';
 import React, { InputHTMLAttributes, useCallback, useEffect, useRef, useState } from 'react';
-import InputMask from 'react-input-mask';
+import InputMask, { ReactInputMask } from 'react-input-mask';
 
 import DatePicker from 'react-datepicker';
 import pt from 'date-fns/locale/pt-BR';
@@ -19,6 +19,7 @@ interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
 }
 
 interface InputRefProps extends InputHTMLAttributes<HTMLInputElement> {
+  maskRef?: React.RefObject<ReactInputMask>;
   inputRef?: React.RefObject<any>;
   dateRef?: React.RefObject<DatePicker>;
   name: string;
@@ -30,8 +31,7 @@ interface InputRefProps extends InputHTMLAttributes<HTMLInputElement> {
   setIsFilled: Function;
 }
 
-const InputDefault: React.FC<InputRefProps> = ({ inputRef, name, isMasked, mask, placeholder, disabled, defaultValue, setIsFocused, setIsFilled, ...rest }) => {
-
+const InputDefault: React.FC<InputRefProps> = ({ maskRef, inputRef, name, isMasked, mask, placeholder, disabled, defaultValue, setIsFocused, setIsFilled, ...rest }) => {
   const handleInputFocused = useCallback(() => {
     setIsFocused(true);
   }, []);
@@ -39,7 +39,7 @@ const InputDefault: React.FC<InputRefProps> = ({ inputRef, name, isMasked, mask,
   const handleInputBlur = useCallback(() => {
     setIsFocused(false);
 
-    setIsFilled(!!inputRef?.current?.value);
+    setIsFilled(!!maskRef ? maskRef.current?.props.value : !!inputRef?.current?.value);
   }, []);
 
   return isMasked ? (
@@ -69,8 +69,9 @@ const InputDefault: React.FC<InputRefProps> = ({ inputRef, name, isMasked, mask,
   );
 }
 
-const InputDatePicker: React.FC<InputRefProps> = ({ dateRef, name, placeholder, disabled, setIsFilled, setIsFocused }) => {
-  const [inputDate, setInputDate] = useState<Date>();
+const InputDatePicker: React.FC<InputRefProps> = ({ dateRef, name, placeholder, disabled, defaultValue, setIsFilled, setIsFocused }) => {
+  const dateParts = !!defaultValue ? defaultValue.split('-') : null;
+  const [inputDate, setInputDate] = useState(!!dateParts ? new Date(+dateParts[2], dateParts[1] - 1, +dateParts[0]) : null);
 
   const handleInputFocused = useCallback(() => {
     setIsFocused(true);
@@ -122,7 +123,7 @@ const Input: React.FC<InputProps> = ({
   ...rest
 }) => {
   const dateRef = useRef<ReactDatePicker>(null);
-  const inputRef = useRef(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   const { fieldName, defaultValue, error, registerField } = useField(name);
 
@@ -134,14 +135,22 @@ const Input: React.FC<InputProps> = ({
       name: fieldName,
       ref: !isDatePicker ? inputRef.current : dateRef.current,
       path: !isDatePicker ? 'value' : 'props.selected',
+      // clearValue: (ref: any) => {
+      //   isMasked ? ref.setInputValue('') : ref.current.value = ''
+      // },
       clearValue: (ref: any) => {
-        ref.current.value = ''
+        ref.clear();
       },
       setValue: (ref, value) => {
-        !!isDatePicker ? ref.current.value = value : ref.current.props.selected = value
+        if (!!ref && !!ref.current)
+          !isDatePicker ? ref.current.value = value : ref.current.props.selected = value
       },
     });
   }, [fieldName, registerField]);
+
+  useEffect(() => {
+    console.log(`Input Error: ${error}`)
+  }, [error])
 
   return (
     <div style={containerStyle}>
@@ -149,9 +158,12 @@ const Input: React.FC<InputProps> = ({
         className={disabled ? styles.containerDisabled : !!error ? styles.containerError : isFocused ? styles.containerFocused : isFilled ? styles.containerFilled : styles.container} >
         {
           isDatePicker ?
-            <InputDatePicker name={name} dateRef={dateRef} placeholder={placeholder} setIsFilled={setIsFilled} setIsFocused={setIsFocused} />
+            <InputDatePicker name={name} dateRef={dateRef} placeholder={placeholder} setIsFilled={setIsFilled} setIsFocused={setIsFocused} defaultValue={defaultValue} {...rest} />
             :
-            <InputDefault name={name} inputRef={inputRef} placeholder={placeholder} isMasked={isMasked} mask={mask} format={format} disabled={disabled} {...rest} defaultValue={defaultValue} setIsFilled={setIsFilled} setIsFocused={setIsFocused} />
+            isMasked ?
+              <InputDefault name={name} inputRef={inputRef} placeholder={placeholder} isMasked={isMasked} mask={mask} format={format} disabled={disabled} {...rest} defaultValue={defaultValue} setIsFilled={setIsFilled} setIsFocused={setIsFocused} />
+              :
+              <InputDefault name={name} inputRef={inputRef} placeholder={placeholder} isMasked={isMasked} mask={mask} format={format} disabled={disabled} {...rest} defaultValue={defaultValue} setIsFilled={setIsFilled} setIsFocused={setIsFocused} />
         }
       </div>
       {error && (

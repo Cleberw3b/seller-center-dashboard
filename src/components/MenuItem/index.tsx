@@ -4,6 +4,7 @@ import { IconBaseProps } from 'react-icons';
 import { useRouter } from "next/router";
 
 import styles from './styles.module.scss';
+import { useAuth } from 'src/hooks/auth';
 
 interface MenuItemProps {
   to: string;
@@ -14,12 +15,16 @@ interface MenuItemProps {
 }
 
 const MenuButton: React.FC<MenuItemProps> = ({ to, name, iconLib: IconLib, iconAuth: IconAuth, setSelected }: MenuItemProps) => {
+  const { isRegisterCompleted } = useAuth();
+
   const router = useRouter();
 
   const select = useCallback(() => {
-    setSelected(to);
-    router.push(to);
-  }, [])
+    if (isRegisterCompleted) {
+      setSelected(to);
+      router.push(to);
+    }
+  }, [isRegisterCompleted])
 
   return (
     <div

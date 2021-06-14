@@ -1,5 +1,6 @@
 import { useRouter } from 'next/router';
 import React, { useCallback, useEffect, useState } from 'react';
+import { useAuth } from 'src/hooks/auth';
 import MenuButton from '../MenuButton';
 import ProfileButton from '../ProfileButton';
 
@@ -12,61 +13,54 @@ interface HeaderProps {
 
 enum OnPage {
   Dashboard,
+  Profile,
   Sells,
   Orders,
   Products,
-  NewProduct
+  NewProduct,
 }
 
 export const Header: React.FC<HeaderProps> = ({ open, setOpen }) => {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState<React.ReactNode>();
 
+  const { isRegisterCompleted } = useAuth();
+
   const router = useRouter();
 
-  const onPage = useCallback((pathname: string): OnPage => {
-
-    if (pathname === '/' || pathname.includes('dashboard'))
-      return OnPage.Dashboard
-
-    if (pathname.includes('sells'))
-      return OnPage.Sells
-
-    if (pathname.includes('orders'))
-      return OnPage.Orders
-
-    if (pathname.includes('create/product')) {
-      console.log(pathname)
-      return OnPage.NewProduct
-    }
-
-    return OnPage.Products
-  }, [title, description]);
-
   useEffect(() => {
-    switch (onPage(router.pathname)) {
-      case OnPage.Dashboard:
-        setTitle('Bem-vindo(a)');
-        setDescription(<span>Essa é a sua área de controle de vendas da Ozllo</span>);
-        break;
-      case OnPage.Sells:
-        setTitle('Vendas');
-        setDescription(<span>Confira o resumo das suas vendas</span>);
-        break;
-      case OnPage.Orders:
-        setTitle('Pedidos');
-        setDescription(<span>Confira o resumo dos seus pedidos</span>);
-        break;
-      case OnPage.Products:
-        setTitle('Produtos');
-        setDescription(<span>Adicione produtos manualmente ou através de um planilha</span>);
-        break;
-      case OnPage.NewProduct:
-        setTitle('Cadastrar novo Produto')
-        setDescription(<span>Preencha <b>todos</b> os campos</span>);
-        break;
+    if (router.pathname === '/' || router.pathname.includes('dashboard')) {
+      setTitle('Bem-vindo(a)');
+      setDescription(<span>Essa é a sua área de controle de vendas da Ozllo</span>);
+      return;
     }
-  }, [router, title])
+
+    if (router.pathname.includes('profile')) {
+      setTitle('Perfil');
+      setDescription(isRegisterCompleted ? <span>As informações da sua conta Ozllo</span> : <span> Finalize seu cadastro para acessar a plataforma </span>);
+      return;
+    }
+
+    if (router.pathname.includes('sells')) {
+      setTitle('Vendas');
+      setDescription(<span>Confira o resumo das suas vendas</span>);
+      return;
+    }
+
+    if (router.pathname.includes('orders')) {
+      setTitle('Pedidos');
+      setDescription(<span>Confira o resumo dos seus pedidos</span>);
+      return;
+    }
+
+    if (router.pathname.includes('create/product')) {
+      setTitle('Cadastrar novo Produto')
+      setDescription(<span>Preencha <b>todos</b> os campos</span>);
+    }
+
+    setTitle('Produtos');
+    setDescription(<span>Adicione produtos manualmente ou através de um planilha</span>);
+  }, [router])
 
   return (
     <header className={styles.headerContainer}>
