@@ -31,9 +31,9 @@ type Product = {
   brand: string;
   sku: string;
   date: string;
-  value: number;
+  price: number;
   stock: number;
-  image?: string;
+  images?: string[];
 }
 
 interface SearchFormData {
@@ -102,10 +102,15 @@ export function Products({ userFromApi }: ProductsProps) {
         shop_id: user.shopInfo._id,
       }
     }).then(response => {
+      console.log('AHA')
+      console.log(response.data)
+
       setProducts(response.data)
+      setItems(response.data)
     }).catch((error) => {
       console.log(error)
       setProducts([]);
+      setItems([])
     })
   }, [user]);
 
@@ -141,8 +146,8 @@ export function Products({ userFromApi }: ProductsProps) {
   }, [items]);
 
   useEffect(() => {
-    console.log(width)
-  }, [width])
+    console.log(items);
+  }, [items])
 
   return (
     <div className={styles.productsContainer}>
@@ -194,7 +199,7 @@ export function Products({ userFromApi }: ProductsProps) {
                 {items.map((item, i) => (
                   <tr className={styles.tableItem} key={item.id}>
                     <td id={styles.imgCell} >
-                      {item.image ? <img src={item.image} alt={item.name} /> : <FiCameraOff />}
+                      {!!item.images ? <img src={item.images[0]} alt={item.name} /> : <FiCameraOff />}
                     </td>
                     <td id={styles.nameCell}>
                       {item.name}
@@ -214,7 +219,7 @@ export function Products({ userFromApi }: ProductsProps) {
                           style: 'currency',
                           currency: 'BRL',
                         }
-                        ).format(item.value)
+                        ).format(item.price)
                       }
                     </td>
                     <td className={item.stock <= 0 ? styles.redText : ''}>
@@ -223,7 +228,7 @@ export function Products({ userFromApi }: ProductsProps) {
                     <td id={styles.switchCell}>
                       <MuiThemeProvider theme={theme}>
                         <Switch
-                          checked={item.status === ProductStatus.Ativado}
+                          checked={item.status !== ProductStatus.Ativado}
                           onChange={() => handleAvailability(item.id)}
                           classes={{
                             root: switchStyles.root,
@@ -233,7 +238,7 @@ export function Products({ userFromApi }: ProductsProps) {
                           }}
                         />
                       </MuiThemeProvider>
-                      <span className={styles.switchSubtitle}>{item.status === ProductStatus.Ativado ? 'Ativado' : 'Desativado'}</span>
+                      <span className={styles.switchSubtitle}>{item.status !== ProductStatus.Ativado ? 'Ativado' : 'Desativado'}</span>
                     </td>
                     <td id={styles.editCell}>
                       <div onClick={() => {

@@ -3,6 +3,7 @@ import React, { useCallback, useRef, ChangeEvent, useState, useMemo } from 'reac
 import { FormHandles, Scope } from '@unform/core';
 import { Form } from '@unform/web';
 import * as Yup from 'yup';
+import { cnpj as cnpjValidator } from 'cpf-cnpj-validator';
 
 import { useAuth } from '../../hooks/auth';
 
@@ -290,6 +291,9 @@ const Profile: React.FC = () => {
               console.log(`Updated User: \n${updatedUser.tostring()}`)
 
               updateUser(updatedUser);
+            }).catch(err => {
+              console.log(err);
+              setStepCompleted(false);
             });
 
             updateUser({
@@ -314,8 +318,11 @@ const Profile: React.FC = () => {
               number,
             } = data.address;
 
+            var cepFormatted = cep.replaceAll("-", "");
+            cepFormatted = cepFormatted.slice(0, 5) + "-" + cepFormatted.slice(5, cep.length)
+
             const addressInfo = {
-              cep,
+              cep: cepFormatted,
               address,
               city,
               complement,
@@ -323,9 +330,9 @@ const Profile: React.FC = () => {
               number
             };
 
-            // api.post('/account/address', addressInfo).then(response => {
-            //   updateUser({ ...user, address: { ...response.data } });
-            // });
+            api.post('/account/address', addressInfo).then(response => {
+              updateUser({ ...user, address: { ...response.data } });
+            });
 
             updateUser({ ...user, address: { ...addressInfo } });
 
@@ -343,9 +350,9 @@ const Profile: React.FC = () => {
               agency
             };
 
-            // api.post('/account/bankInfo', bankInfo).then(response => {
-            //   updateUser({ ...user, address: { ...response.data } });
-            // });
+            api.post('/account/bankInfo', bankInfo).then(response => {
+              updateUser({ ...user, address: { ...response.data } });
+            });
 
             updateUser({ ...user, ...bankInfo })
 
@@ -354,17 +361,19 @@ const Profile: React.FC = () => {
             const storeName = data.shopInfo.name;
             const cnpj = data.shopInfo.cnpj;
 
-            const shopInfo = { name: storeName, cnpj };
+            const shopInfo = { name: storeName, cnpj: cnpjValidator.format(cnpj) };
 
-            // api.post('/account/shopInfo', shopInfo).then(response => {
-            //   updateUser({ ...user, shopInfo: { ...response.data } });
-            // });
+            api.post('/account/shopInfo', shopInfo).then(response => {
+              console.log("Reponded!")
+              updateUser({ ...user, shopInfo: { ...response.data } });
+            });
 
-            updateUser({ ...user, shopInfo: { _id: user.shopInfo._id, ...shopInfo } });
+            // updateUser({ ...user, shopInfo: { ...shopInfo } });
 
             break;
         }
 
+        console.log('Ending?')
         setStepCompleted(true);
 
         // handleFlowStep();
@@ -376,6 +385,8 @@ const Profile: React.FC = () => {
         //     'Suas informações do perfil foram alteradas com sucesso!',
         // });
       } catch (err) {
+        console.log(err)
+
         setStepCompleted(false);
 
         if (err instanceof Yup.ValidationError) {
@@ -468,7 +479,7 @@ const Profile: React.FC = () => {
                     onChange={() => {
                       setChanged(true)
                     }}
-                  // defaultValue={!!user?.personalInfo.birthday ? user.personalInfo.birthday.toString() : ''}
+                    defaultValue={!!user?.personalInfo && !!user?.personalInfo.birthday ? user.personalInfo.birthday.toString() : ''}
                   />
                 </Scope>
 

@@ -26,6 +26,7 @@
     "@unform/core": "^2.1.6",
     "@unform/web": "^2.1.6",
     "axios": "^0.21.1",
+    "cpf-cnpj-validator": "^1.0.3",
     "date-fns": "^2.19.0",
     "dotenv": "^9.0.0",
     "jsonwebtoken": "^8.5.1",

@@ -146,3 +146,8 @@ export const isTokenValid = (token: string | undefined): boolean => {
 
   return decoded.exp >= now
 }
+
+const getFormData = object => Object.keys(object).reduce((formData, key) => {
+  formData.append(key, object[key]);
+  return formData;
+}, new FormData());

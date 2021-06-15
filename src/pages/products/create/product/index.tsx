@@ -47,20 +47,9 @@ export type Product = {
     color: string,
   }[],
 
-  nationality: {
-    id: any,
-    name: string,
-  },
-  category: {
-    id: any,
-    name: string,
-    sub_category: [
-      {
-        id: any,
-        name: string,
-      }
-    ]
-  },
+  nationality: string,
+  category: string,
+  sub_category: string,
 }
 
 type ProductDTO = {
@@ -86,12 +75,13 @@ export function ProductForm() {
 
   const router = useRouter();
 
-  const { user, updateUser } = useAuth();
+  const { user, token, updateUser } = useAuth();
 
   useEffect(() => {
     console.log(user)
-    api.get('/account').then(response => {
-      updateUser({ ...user, ...response.data })
+    api.get('/account/detail').then(response => {
+      console.log(response.data)
+      updateUser({ ...user, shopInfo: { ...user.shopInfo, _id: response.data.shopInfo._id } })
     }).catch(err => {
       console.log(err)
     });
@@ -210,8 +200,12 @@ export function ProductForm() {
       const {
         category,
         subCategory,
-        nationallity
+        nationality
       } = router.query;
+
+      console.log(`Category: ${category}`)
+      console.log(`Sub-category: ${subCategory}`)
+      console.log(`Nationallity: ${nationality}`)
 
       const {
         name,
@@ -224,13 +218,17 @@ export function ProductForm() {
         width,
         length,
         weight,
+        price,
+        price_discounted,
         variations
       } = data;
+
+      console.log(`Height: ${height}`)
 
       const product = {
         category,
         subCategory,
-        nationallity,
+        nationality,
         name,
         description,
         brand,
@@ -241,14 +239,29 @@ export function ProductForm() {
         width,
         length,
         weight,
+        price,
+        price_discounted,
         variations,
-        images: [
-          ...files
-        ]
       }
 
+      var dataContainer = new FormData();
+
+      Object.keys(product).forEach(key => dataContainer.append(key, product[key]));
+
+      files.forEach(file => {
+        console.log(`File: ${file.name}`)
+        dataContainer.append("images", file, file.name)
+      });
+
+      // dataContainer.append("product", JSON.stringify(product));
+
       //TODO: chamada para a API
-      const response = await api.post('/product', product).then(response => {
+      const response = await api.post('/product', dataContainer, {
+        headers: {
+          authorization: token,
+          shop_id: user.shopInfo._id,
+        }
+      }).then(response => {
         console.log(response.data)
       });
 
@@ -269,7 +282,7 @@ export function ProductForm() {
         return;
       }
     }
-  }, [router, filledFields, totalFields])
+  }, [router, token, user, filledFields, totalFields])
 
   return (
     <>
@@ -377,7 +390,7 @@ export function ProductForm() {
             </div>
             <div className={styles.multipleInputContainer}>
               <Input
-                name='heigth'
+                name='height'
                 label='Alturam (cm)'
                 placeholder='Altura do produto'
                 autoComplete='off'

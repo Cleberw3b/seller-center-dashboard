@@ -40,7 +40,7 @@ export interface User {
   }
 
   shopInfo: {
-    _id: string,
+    _id?: string,
     name: string,
     cnpj: string,
 
