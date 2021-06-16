@@ -22,7 +22,7 @@ const Dashboard: React.FC = () => {
     name: 'Aprovados', value: new Intl.NumberFormat('pt-BR', {
       style: 'currency',
       currency: 'BRL',
-    }).format(1000000)
+    }).format(0)
   } as OrderSummary);
 
   const [canceledOrders, setCanceledOrders] = useState({} as OrderSummary);
@@ -39,21 +39,21 @@ const Dashboard: React.FC = () => {
           description='Confira os status de suas vendas'
           onPanelButtonClick={() => { router.push('/sells') }}>
           <PanelItem title={approvedOrders.name} value={approvedOrders.value} valueColor='green' />
-          <PanelItem title='Processando' value='R$ 1.000.000,00' valueColor='blue' />
-          <PanelItem title='Cancelados' value='R$ 1.000.000,00' valueColor='red' />
-          <PanelItem title='Devolvidos' value='R$ 1.000.000,00' valueColor='orange' />
+          <PanelItem title='Processando' value='R$ 0,00' valueColor='blue' />
+          <PanelItem title='Cancelados' value='R$ 0,00' valueColor='red' />
+          <PanelItem title='Devolvidos' value='R$ 0,00' valueColor='orange' />
         </Panel>
         <Panel
           icon={FiSend}
           title='Status dos Envios'
           description='Confira os status e quantidades referentes aos envios'
           onPanelButtonClick={() => { router.push('/sells') }}>
-          <PanelItem title='Aguardando confirmação' value='32' valueColor='gray' />
-          <PanelItem title='Aguardando despacho' value='32' valueColor='yellow' />
-          <PanelItem title='Despachados' value='32' valueColor='blue' />
-          <PanelItem title='Entregues' value='32' valueColor='green' />
-          <PanelItem title='Retornados' value='32' valueColor='orange' />
-          <PanelItem title='Cancelados' value='32' valueColor='red' />
+          <PanelItem title='Aguardando confirmação' value='0' valueColor='gray' />
+          <PanelItem title='Aguardando despacho' value='0' valueColor='yellow' />
+          <PanelItem title='Despachados' value='0' valueColor='blue' />
+          <PanelItem title='Entregues' value='0' valueColor='green' />
+          <PanelItem title='Retornados' value='0' valueColor='orange' />
+          <PanelItem title='Cancelados' value='0' valueColor='red' />
         </Panel>
         {/* <div className={styles.panelShortcuts}>
           <span>Atalhos</span>
@@ -65,14 +65,5 @@ const Dashboard: React.FC = () => {
     </div>
   );
 };
-
-export const getStaticProps: GetStaticProps = async ({ }) => {
-
-
-  return {
-    props: {},
-    revalidate: 10
-  }
-}
 
 export default Dashboard;

@@ -19,6 +19,7 @@ import Button from '../../components/PrimaryButton';
 import AvatarInput from '../../components/AvatarInput';
 import { format } from 'date-fns';
 import { useEffect } from 'react';
+import { useRouter } from 'next/router';
 
 type ProfileFormData = {
   personalInfo: {
@@ -83,7 +84,8 @@ const Profile: React.FC = () => {
 
   const formRef = useRef<FormHandles>(null);
 
-  const { user, updateUser, isRegisterCompleted } = useAuth();
+  const { user, updateUser } = useAuth();
+  const router = useRouter();
 
   useEffect(() => {
     // console.log(user)
@@ -199,6 +201,10 @@ const Profile: React.FC = () => {
       if (flowIntent === false && flowStep > 0) {
         console.log(`Volt: ${flowStep - 1}`);
         setFlowStep(flowStep - 1);
+      }
+
+      if (flowIntent === true && flowStep === 3) {
+        router.push('/dashboard');
       }
     }
   }, [flowIntent, flowStep, isStepCompleted]);
@@ -749,9 +755,9 @@ const Profile: React.FC = () => {
                 // console.log('Done?');
               }}
               customStyle={{ className: styles.nextButton }}
-              disabled={(flowStep === STORE_INDEX)}
+            // disabled={(flowStep === STORE_INDEX)}
             >
-              Avançar
+              {(flowStep !== STORE_INDEX) ? 'Avançar' : 'Confirmar'}
             </Button>
           </div>
         </Form>

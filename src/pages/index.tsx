@@ -31,11 +31,11 @@ const SignIn: React.FC = () => {
 
   const route = useRouter();
 
-  if (user) {
-    route.push('/dashboard');
-  }
-
-  useEffect(() => { console.log(`Loading: ${isLoading}`) }, [isLoading])
+  useEffect(() => {
+    if (!!user) {
+      route.push('/dashboard');
+    }
+  }, [user, route])
 
   const handleSubmit = useCallback(
     async (data: SignInFormData) => {

@@ -15,7 +15,7 @@ export const ProfileButton: React.FC = () => {
   return (
     <div className={styles.profileContainer}>
       <div className={styles.info}>
-        {user ? <span> Olá, {user.personalInfo.firstName} </span> : <span> Usuário não encontrado </span>}
+        {!!user && !!user.personalInfo ? <span> Olá, {user.personalInfo.firstName} </span> : <span> Usuário não encontrado </span>}
         {/* {user ? <img src={!user.avatar_url ? 'https://www.projetodraft.com/wp-content/uploads/2019/06/ozllo_logo.jpg' : user.avatar_url} alt={user.name} /> : <FiUser size={52} color='var(--grafite)' />} */}
         <FiUser color='var(--grafite)' />
       </div>
