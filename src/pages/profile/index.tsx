@@ -4,6 +4,7 @@ import { FormHandles, Scope } from '@unform/core';
 import { Form } from '@unform/web';
 import * as Yup from 'yup';
 import { cnpj as cnpjValidator } from 'cpf-cnpj-validator';
+import { InactiveUserError } from 'src/shared/errors/InactiveUserError';
 
 import { useAuth } from '../../hooks/auth';
 
@@ -16,7 +17,6 @@ import styles from './styles.module.scss';
 import Input from '../../components/InputLabeless';
 import Button from '../../components/PrimaryButton';
 import AvatarInput from '../../components/AvatarInput';
-import { FiChevronLeft, FiChevronRight } from 'react-icons/fi';
 import { format } from 'date-fns';
 import { useEffect } from 'react';
 
@@ -86,7 +86,7 @@ const Profile: React.FC = () => {
   const { user, updateUser, isRegisterCompleted } = useAuth();
 
   useEffect(() => {
-    console.log(user)
+    // console.log(user)
     api.get('/account/detail').then(response => {
       updateUser({ ...user, ...response.data })
 

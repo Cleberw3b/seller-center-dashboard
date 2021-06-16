@@ -1,6 +1,7 @@
 import React, { createContext, useCallback, useState, useContext, useMemo } from 'react';
 import api from '../services/api';
 import jwt_decode from "jwt-decode";
+import { InactiveUserError } from 'src/shared/errors/InactiveUserError';
 
 interface ApiToken {
   auth: boolean;
@@ -11,6 +12,7 @@ interface Token {
 }
 export interface User {
   email: string,
+  isActive: boolean,
 
   personalInfo: {
     firstName: string,
@@ -103,12 +105,22 @@ const AuthProvider: React.FC = ({ children }) => {
 
     const decodedToken = jwt_decode(token) as Token;
 
-    const user = decodedToken.data as User;
+    let user: User = decodedToken.data as User;
+
+    api.defaults.headers.authorization = token;
+
+    await api.get('/account/detail').then(response => {
+      user = { ...user, ...response.data }
+
+      if (!user.isActive) {
+        throw new InactiveUserError("Usuário inativado, login não pode ser realizado.");
+      }
+    }).catch(err => {
+      console.log(err)
+    });
 
     localStorage.setItem('@SellerCenter:token', token);
     localStorage.setItem('@SellerCenter:user', JSON.stringify(user));
-
-    api.defaults.headers.authorization = token;
 
     setData({ token, user });
   }, []);

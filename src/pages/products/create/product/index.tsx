@@ -34,6 +34,7 @@ export type Product = {
   more_info?: string,
   ean?: string,
   sku: string,
+  gender: string,
   price: number,
   price_discounted?: number;
   height?: number,
@@ -52,18 +53,6 @@ export type Product = {
   sub_category: string,
 }
 
-type ProductDTO = {
-  id: string;
-  status: number;
-  name: string;
-  brand: string;
-  sku: string;
-  date: string;
-  value: number;
-  stock: number;
-  image?: string;
-}
-
 export function ProductForm() {
   const [files, setFiles] = useState<File[]>([]);
   const [filesUrl, setFilesUrl] = useState<string[]>([]);
@@ -78,9 +67,7 @@ export function ProductForm() {
   const { user, token, updateUser } = useAuth();
 
   useEffect(() => {
-    console.log(user)
     api.get('/account/detail').then(response => {
-      console.log(response.data)
       updateUser({ ...user, shopInfo: { ...user.shopInfo, _id: response.data.shopInfo._id } })
     }).catch(err => {
       console.log(err)
@@ -104,16 +91,14 @@ export function ProductForm() {
 
   const calcTotalFields = useCallback((data: Product) => {
     if (!!data.variations) {
-      setTotalFields(10 + data.variations?.length * 3);
+      setTotalFields(11 + data.variations?.length * 3);
       return;
     }
 
-    setTotalFields(13);
+    setTotalFields(14);
   }, [totalFields, filledFields]);
 
   const calcFilledFields = useCallback((data: Product) => {
-    console.log(data);
-
     let filled = 0;
 
     if (data.name)
@@ -170,6 +155,7 @@ export function ProductForm() {
         width: Yup.string(),
         length: Yup.string(),
         weight: Yup.string(),
+        gender: Yup.string(),
         variations: Yup.array().required().of(Yup.object().shape({
           // type: Yup.string().equals(['number', 'size']),
           // size: Yup.mixed().when('type', {
@@ -203,9 +189,20 @@ export function ProductForm() {
         nationality
       } = router.query;
 
-      console.log(`Category: ${category}`)
-      console.log(`Sub-category: ${subCategory}`)
-      console.log(`Nationallity: ${nationality}`)
+      var dataContainer = new FormData();
+
+      files.forEach(file => {
+        dataContainer.append("images", file, file.name)
+      });
+
+      const imagesUrls = await api.post('/product/upload', dataContainer, {
+        headers: {
+          authorization: token,
+          shop_id: user.shopInfo._id,
+        }
+      }).then(response => {
+        return response.data.urls
+      });
 
       const {
         name,
@@ -214,6 +211,7 @@ export function ProductForm() {
         more_info,
         ean,
         sku,
+        gender,
         height,
         width,
         length,
@@ -222,8 +220,6 @@ export function ProductForm() {
         price_discounted,
         variations
       } = data;
-
-      console.log(`Height: ${height}`)
 
       const product = {
         category,
@@ -235,28 +231,19 @@ export function ProductForm() {
         more_info,
         ean,
         sku,
+        gender,
         height,
         width,
         length,
         weight,
         price,
         price_discounted,
-        variations,
+        images: imagesUrls,
+        variations
       }
 
-      var dataContainer = new FormData();
-
-      Object.keys(product).forEach(key => dataContainer.append(key, product[key]));
-
-      files.forEach(file => {
-        console.log(`File: ${file.name}`)
-        dataContainer.append("images", file, file.name)
-      });
-
-      // dataContainer.append("product", JSON.stringify(product));
-
       //TODO: chamada para a API
-      const response = await api.post('/product', dataContainer, {
+      const response = await api.post('/product', product, {
         headers: {
           authorization: token,
           shop_id: user.shopInfo._id,

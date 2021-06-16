@@ -24,16 +24,22 @@ enum ProductStatus {
   Desativado = 1,
 }
 
+type Variation = {
+  size: number | string,
+  stock: number,
+  color: string,
+}
+
 type Product = {
   id: string;
   status: ProductStatus;
   name: string;
   brand: string;
   sku: string;
-  date: string;
   price: number;
   stock: number;
   images?: string[];
+  variations: Variation[];
 }
 
 interface SearchFormData {
@@ -67,16 +73,6 @@ export function Products({ userFromApi }: ProductsProps) {
     !!userFromApi && updateUser({ ...user, shopInfo: { ...user.shopInfo, _id: userFromApi.shopInfo._id } })
   }, [userFromApi])
 
-  const { width } = useMemo(() => {
-    if (typeof window !== 'undefined') {
-      return { width: window.innerWidth }
-    }
-
-    return {
-      width: undefined
-    }
-  }, [process.browser]);
-
   // const itemsRef = useMemo(() => Array(items.length).fill(0).map(i => React.createRef<HTMLInputElement>()), [items]);
 
   const formRef = useRef<FormHandles>(null);
@@ -89,29 +85,49 @@ export function Products({ userFromApi }: ProductsProps) {
 
 
     setItems(products.filter(product => {
-      return (search === '' || product.name.toLowerCase().includes(search.toLowerCase()));
+      return (!!product.name && (search === '' || product.name.toLowerCase().includes(search.toLowerCase())));
     }));
 
     setLoading(false);
-  }, [search]);
+  }, [search, products]);
 
   useEffect(() => {
-    api.get('/product', {
-      headers: {
-        authorization: token,
-        shop_id: user.shopInfo._id,
-      }
-    }).then(response => {
-      console.log('AHA')
-      console.log(response.data)
+    if (!!user) {
+      api.get('/product', {
+        headers: {
+          authorization: token,
+          shop_id: user.shopInfo._id,
+        }
+      }).then(response => {
+        // console.log(response.data)
 
-      setProducts(response.data)
-      setItems(response.data)
-    }).catch((error) => {
-      console.log(error)
-      setProducts([]);
-      setItems([])
-    })
+        let productsDto = response.data as Product[];
+
+        productsDto = productsDto.map(product => {
+          let stockCount = 0;
+
+          console.log(product);
+
+          if (!!product.variations && Array.isArray(product.variations)) {
+            product.variations.forEach(variation => {
+              stockCount += variation.stock as number;
+            })
+          }
+
+          product.stock = stockCount;
+
+          return product;
+        })
+
+
+        setProducts(productsDto)
+        setItems(productsDto)
+      }).catch((error) => {
+        console.log(error)
+        setProducts([]);
+        setItems([])
+      })
+    }
   }, [user]);
 
   const handleSubmit = useCallback(
@@ -188,11 +204,10 @@ export function Products({ userFromApi }: ProductsProps) {
                   <th>Nome do produto</th>
                   <th>Marca</th>
                   <th>SKU</th>
-                  <th>Data</th>
                   <th>Valor</th>
                   <th>Estoque</th>
-                  <th>Status</th>
-                  <th>Ação</th>
+                  {/* <th>Status</th>
+                  <th>Ação</th> */}
                 </tr>
               </thead>
               <tbody className={styles.tableBody}>
@@ -210,9 +225,6 @@ export function Products({ userFromApi }: ProductsProps) {
                     <td>
                       {item.sku}
                     </td>
-                    <td id={styles.dateCell}>
-                      {item.date}
-                    </td>
                     <td id={styles.valueCell}>
                       {
                         new Intl.NumberFormat('pt-BR', {
@@ -223,17 +235,17 @@ export function Products({ userFromApi }: ProductsProps) {
                       }
                     </td>
                     <td className={item.stock <= 0 ? styles.redText : ''}>
-                      {item.stock}
+                      {new Intl.NumberFormat('pt-BR').format(item.stock)}
                     </td>
-                    <td id={styles.switchCell}>
+                    {/* <td id={styles.switchCell}>
                       <MuiThemeProvider theme={theme}>
                         <Switch
                           checked={item.status !== ProductStatus.Ativado}
                           onChange={() => handleAvailability(item.id)}
                           classes={{
                             root: switchStyles.root,
-                            thumb: item.status === ProductStatus.Ativado ? switchStyles.thumb : switchStyles.thumbUnchecked,
-                            track: item.status === ProductStatus.Ativado ? switchStyles.track : switchStyles.trackUnchecked,
+                            thumb: item.status !== ProductStatus.Ativado ? switchStyles.thumb : switchStyles.thumbUnchecked,
+                            track: item.status !== ProductStatus.Ativado ? switchStyles.track : switchStyles.trackUnchecked,
                             checked: switchStyles.checked,
                           }}
                         />
@@ -252,7 +264,7 @@ export function Products({ userFromApi }: ProductsProps) {
                         <FiEdit />
                         <span> Editar </span>
                       </div>
-                    </td>
+                    </td> */}
                   </tr>
                 ))
                 }

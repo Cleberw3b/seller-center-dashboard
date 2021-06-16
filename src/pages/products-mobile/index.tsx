@@ -16,10 +16,18 @@ import styles from './styles.module.scss';
 import switchStyles from './switch-styles.module.scss';
 
 import { MuiThemeProvider, createMuiTheme } from '@material-ui/core';
+import { useAuth, User } from 'src/hooks/auth';
+import api from 'src/services/api';
 
 enum ProductStatus {
   Ativado = 0,
   Desativado = 1,
+}
+
+type Variation = {
+  size: number | string,
+  stock: number,
+  color: string,
 }
 
 type Product = {
@@ -28,10 +36,10 @@ type Product = {
   name: string;
   brand: string;
   sku: string;
-  date: string;
-  value: number;
+  price: number;
   stock: number;
-  image?: string;
+  images?: string[];
+  variations: Variation[];
 }
 
 interface SearchFormData {
@@ -40,6 +48,10 @@ interface SearchFormData {
 
 interface ProductsProps {
   products: Product[];
+}
+
+interface ProductsProps {
+  userFromApi: User;
 }
 
 const theme = createMuiTheme({
@@ -53,31 +65,61 @@ const theme = createMuiTheme({
   },
 });
 
-export function Products({ }: ProductsProps) {
+export function Products({ userFromApi }: ProductsProps) {
+  const [products, setProducts] = useState([] as Product[]);
   const [items, setItems] = useState([] as Product[]);
   const [search, setSeacrh] = useState('');
   const [loading, setLoading] = useState(false);
-
-  let products: Product[] = [];
-
-  // const itemsRef = useMemo(() => Array(items.length).fill(0).map(i => React.createRef<HTMLInputElement>()), [items]);
 
   const formRef = useRef<FormHandles>(null);
   const [error, setError] = useState('');
 
   const router = useRouter();
 
+  const { token, user, updateUser } = useAuth();
+
   useEffect(() => {
-    const items = localStorage.getItem('@SellerCenter:items');
+    if (!!user) {
+      api.get('/product', {
+        headers: {
+          authorization: token,
+          shop_id: user.shopInfo._id,
+        }
+      }).then(response => {
+        // console.log(response.data)
 
-    if (!items) {
-      localStorage.setItem('@SellerCenter:items', JSON.stringify(productsFromApi));
-      products = productsFromApi;
-      return;
+        let productsDto = response.data as Product[];
+
+        productsDto = productsDto.map(product => {
+          let stockCount = 0;
+
+          console.log(product);
+
+          if (!!product.variations && Array.isArray(product.variations)) {
+            product.variations.forEach(variation => {
+              stockCount += variation.stock as number;
+            })
+          }
+
+          product.stock = stockCount;
+
+          return product;
+        })
+
+
+        setProducts(productsDto)
+        setItems(productsDto)
+      }).catch((error) => {
+        console.log(error)
+        setProducts([]);
+        setItems([])
+      })
     }
+  }, [user]);
 
-    products = JSON.parse(items);
-  }, [products])
+  useEffect(() => {
+    !!userFromApi && updateUser({ ...user, shopInfo: { ...user.shopInfo, _id: userFromApi.shopInfo._id } })
+  }, [userFromApi])
 
   useEffect(() => {
     setLoading(true);
@@ -88,7 +130,7 @@ export function Products({ }: ProductsProps) {
     }));
 
     setLoading(false);
-  }, [search]);
+  }, [search, products]);
 
 
   const handleSubmit = useCallback(
@@ -154,10 +196,10 @@ export function Products({ }: ProductsProps) {
         </div>
         {items.length > 0 ? (
           items.map((item, i) => (
-            <div className={styles.itemCard}>
+            <div className={styles.itemCard} key={i}>
               <div className={styles.cardBody}>
                 <div className={styles.cardImg}>
-                  {item.image ? <img src={item.image} alt={item.name} /> : <FiCameraOff />}
+                  {!!item.images ? <img src={item.images[0]} alt={item.name} /> : <FiCameraOff />}
                 </div>
                 <div className={styles.itemInfo}>
                   <span className={styles.itemName}>{item.name}</span>
@@ -167,42 +209,39 @@ export function Products({ }: ProductsProps) {
                   <div>
                     Marca: <b>{item.brand}</b>
                   </div>
-                  <div>
-                    Cadastro: <b>{item.date}</b>
-                  </div>
                   <div className={styles.value}>
                     <span>Valor: {
                       new Intl.NumberFormat('pt-BR', {
                         style: 'currency',
                         currency: 'BRL',
                       }
-                      ).format(item.value)
+                      ).format(item.price)
                     }</span>
                   </div>
                 </div>
                 <div className={styles.switchContainer}>
-                  <MuiThemeProvider theme={theme}>
+                  {/* <MuiThemeProvider theme={theme}>
                     <Switch
-                      checked={item.status === ProductStatus.Ativado}
+                      checked={item.status !== ProductStatus.Ativado}
                       onChange={() => handleAvailability(item.id)}
                       classes={{
                         root: switchStyles.root,
-                        thumb: item.status === ProductStatus.Ativado ? switchStyles.thumb : switchStyles.thumbUnchecked,
-                        track: item.status === ProductStatus.Ativado ? switchStyles.track : switchStyles.trackUnchecked,
+                        thumb: item.status !== ProductStatus.Ativado ? switchStyles.thumb : switchStyles.thumbUnchecked,
+                        track: item.status !== ProductStatus.Ativado ? switchStyles.track : switchStyles.trackUnchecked,
                         checked: switchStyles.checked,
                       }}
                     />
                   </MuiThemeProvider>
-                  <span className={styles.switchSubtitle}>{item.status === ProductStatus.Ativado ? 'Ativado' : 'Desativado'}</span>
+                  <span className={styles.switchSubtitle}>{item.status !== ProductStatus.Ativado ? 'Ativado' : 'Desativado'}</span> */}
                   <div className={styles.stockContainer}>
-                    <span className={item.stock > 0 ? styles.stock : styles.outStock}>{item.stock}</span>
+                    <span className={item.stock > 0 ? styles.stock : styles.outStock}>{new Intl.NumberFormat('pt-BR').format(item.stock)}</span>
                     <span>Em estoque</span>
                   </div>
                 </div>
               </div>
               <div className={styles.cardDivider} />
               <div className={styles.cardFooter}>
-                <div onClick={() => {
+                {/* <div onClick={() => {
                   router.push({
                     pathname: 'products/edit',
                     query: {
@@ -212,7 +251,7 @@ export function Products({ }: ProductsProps) {
                 }}>
                   <FiEdit />
                   <span> Editar </span>
-                </div>
+                </div> */}
               </div>
             </div>
           ))
@@ -224,190 +263,16 @@ export function Products({ }: ProductsProps) {
   )
 }
 
-export let productsFromApi: Product[] = [
-  {
-    id: '1',
-    status: ProductStatus.Ativado,
-    name: 'Moletom Candy Bloomer...',
-    brand: 'Balenciaga',
-    sku: '3333333',
-    date: format(new Date(), 'dd/MM/yyyy'),
-    value: 299.90,
-    stock: 23,
-    image: 'https://ozllo.vteximg.com.br/arquivos/ids/247789-1000-1263/image-f16b8e9009eb422698d1f902a2beb94f.jpg?v=637544503040600000'
-  },
-  {
-    id: '2',
-    status: ProductStatus.Ativado,
-    name: 'Moletom Candy Bloomer...',
-    brand: 'Balenciaga',
-    sku: '3333333',
-    date: format(new Date(), 'dd/MM/yyyy'),
-    value: 299.90,
-    stock: 23,
-    image: 'https://ozllo.vteximg.com.br/arquivos/ids/247789-1000-1263/image-f16b8e9009eb422698d1f902a2beb94f.jpg?v=637544503040600000'
-  },
-  {
-    id: '3',
-    status: ProductStatus.Ativado,
-    name: 'Moletom Candy Bloomer...',
-    brand: 'Balenciaga',
-    sku: '3333333',
-    date: format(new Date(), 'dd/MM/yyyy'),
-    value: 299.90,
-    stock: 0,
-    image: ''
-  },
-  {
-    id: '4',
-    status: ProductStatus.Ativado,
-    name: 'Moletom Candy Bloomer...',
-    brand: 'Balenciaga',
-    sku: '3333333',
-    date: format(new Date(), 'dd/MM/yyyy'),
-    value: 299.90,
-    stock: 0,
-    image: ''
-  },
-  {
-    id: '5',
-    status: ProductStatus.Ativado,
-    name: 'Moletom Candy Bloomer...',
-    brand: 'Balenciaga',
-    sku: '3333333',
-    date: '01/04/2021',
-    value: 299.90,
-    stock: 0,
-    image: ''
-  },
-  {
-    id: '6',
-    status: ProductStatus.Ativado,
-    name: 'Moletom Candy Bloomer...',
-    brand: 'Balenciaga',
-    sku: '3333333',
-    date: '01/04/2021',
-    value: 299.90,
-    stock: 23,
-    image: ''
-  },
-  {
-    id: '7',
-    status: ProductStatus.Ativado,
-    name: 'Moletom Candy Bloomer...',
-    brand: 'Balenciaga',
-    sku: '3333333',
-    date: '01/04/2021',
-    value: 299.90,
-    stock: 23,
-    image: ''
-  },
-  {
-    id: '8',
-    status: ProductStatus.Ativado,
-    name: 'Moletom Candy Bloomer...',
-    brand: 'Balenciaga',
-    sku: '3333333',
-    date: '01/04/2021',
-    value: 299.90,
-    stock: 23,
-    image: ''
-  },
-  {
-    id: '9',
-    status: ProductStatus.Ativado,
-    name: 'Moletom Candy Bloomer...',
-    brand: 'Balenciaga',
-    sku: '3333333',
-    date: '01/04/2021',
-    value: 299.90,
-    stock: 23,
-    image: ''
-  },
-  {
-    id: '10',
-    status: ProductStatus.Ativado,
-    name: 'Moletom Candy Bloomer...',
-    brand: 'Balenciaga',
-    sku: '3333333',
-    date: '01/04/2021',
-    value: 299.90,
-    stock: 23,
-    image: ''
-  },
-  {
-    id: '11',
-    status: ProductStatus.Ativado,
-    name: 'Moletom Candy Bloomer...',
-    brand: 'Balenciaga',
-    sku: '3333333',
-    date: '01/04/2021',
-    value: 299.90,
-    stock: 23,
-    image: ''
-  },
-  {
-    id: '12',
-    status: ProductStatus.Ativado,
-    name: 'Moletom Candy Bloomer...',
-    brand: 'Balenciaga',
-    sku: '3333333',
-    date: '04/04/2021',
-    value: 299.90,
-    stock: 23,
-    image: ''
-  },
-  {
-    id: '13',
-    status: ProductStatus.Desativado,
-    name: 'Moletom Candy Bloomer...',
-    brand: 'Balenciaga',
-    sku: '3333333',
-    date: '01/04/2021',
-    value: 299.90,
-    stock: 0,
-    image: ''
-  },
-  {
-    id: '14',
-    status: ProductStatus.Desativado,
-    name: 'Moletom Candy Bloomer...',
-    brand: 'Balenciaga',
-    sku: '3333333',
-    date: '04/04/2021',
-    value: 299.90,
-    stock: 0,
-    image: ''
-  },
-  {
-    id: '15',
-    status: ProductStatus.Desativado,
-    name: 'Moletom Candy Bloomer...',
-    brand: 'Balenciaga',
-    sku: '3333333',
-    date: '01/04/2021',
-    value: 299.90,
-    stock: 23,
-    image: ''
-  },
-  {
-    id: '16',
-    status: ProductStatus.Desativado,
-    name: 'Moletom Candy Bloomer...',
-    brand: 'Balenciaga',
-    sku: '3333333',
-    date: '04/04/2021',
-    value: 299.90,
-    stock: 23,
-    image: ''
-  },
-]
-
-export const getStaticProps: GetStaticProps = async () => {
+export const getInitialProps = async () => {
+  const user = api.get('/account/detail').then(response => {
+    return response.data as User;
+  }).catch(err => {
+    console.log(err)
+  });
 
   return ({
     props: {
-      products: productsFromApi,
+      userFromApi: user
     },
     revalidate: 10
   });

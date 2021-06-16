@@ -80,6 +80,7 @@
 
     .emptyList {
       flex: 1;
+      height: 100%;
       margin-top: auto;
       margin-bottom: auto;
       justify-self: center;
@@ -148,7 +149,9 @@
               }
 
               img {
-                max-height: 5rem;
+                height: 6rem;
+                object-fit: fill;
+                // max-height: 5rem;
               }
             }
 

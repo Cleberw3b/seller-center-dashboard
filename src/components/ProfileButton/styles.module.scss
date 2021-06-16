@@ -85,6 +85,18 @@
       }
     }
 
+    > svg {
+      width: 2.5rem;
+      height: 2.5rem;
+
+      margin-left: 1rem;
+
+      @media screen and (min-width: $desktop-size) {
+        width: 3.25rem;
+        height: 3.25rem;
+      }
+    }
+
     > span {
       font-size: 0.8rem;
       font-weight: 700;
