@@ -18,7 +18,6 @@ import { FiChevronLeft, FiX } from 'react-icons/fi';
 
 import styles from './styles.module.scss'
 
-import { productsFromApi } from '../index';
 import { format } from 'date-fns';
 
 export type Product = {
@@ -61,18 +60,6 @@ export type Product = {
       }
     ]
   },
-}
-
-type ProductDTO = {
-  id: string;
-  status: number;
-  name: string;
-  brand: string;
-  sku: string;
-  date: string;
-  value: number;
-  stock: number;
-  image?: string;
 }
 
 export function ProductEdit() {
@@ -178,24 +165,6 @@ export function ProductEdit() {
         nationallity
       } = router.query;
 
-      data.variations.map((v, i) => {
-        let produts = productsFromApi;
-        const produtoDTO: ProductDTO = {
-          id: produts.length.toString(),
-          status: 0,
-          name: data.name,
-          brand: data.brand,
-          sku: data.sku,
-          date: format(new Date(), 'dd/MM/yyyy'),
-          value: v.price,
-          stock: v.stock,
-          image: data.images[0].url
-        };
-
-        produts.push(produtoDTO);
-        localStorage.setItem('@SellerCenter:items', JSON.stringify(produts));
-      })
-
 
       // const {
       //   name,
@@ -249,7 +218,7 @@ export function ProductEdit() {
             icon={FiChevronLeft}
           >
             Voltar
-        </Button>
+          </Button>
         </section>
         <div className={styles.divider} />
         <section className={styles.content}>
@@ -259,12 +228,14 @@ export function ProductEdit() {
           }}>
             <p className={styles.imagesTitle}>Seleciones as fotos do produto</p>
             <div className={styles.imagesContainer}>
-              <Dropzone name='images' filesUrl={filesUrl} setFilesUrl={setFilesUrl} onFileUploaded={() => { }}></Dropzone>
+              {/* TO-DO  AJUSTAR DROPZONE */}
+
+              {/* <Dropzone name='images' filesUrl={filesUrl} setFilesUrl={setFilesUrl} onFileUploaded={() => { }}></Dropzone>
               {
                 filesUrl.map((file, i) => (
                   <ImageCard key={i} onClick={() => handleDeleteFile(file)} imgUrl={file} />
                 ))
-              }
+              } */}
             </div>
             <div className={styles.doubleInputContainer}>
               <Input

@@ -150,7 +150,6 @@ const SignUp: React.FC = () => {
         <Form
           ref={formRef}
           initialData={{
-            name: user?.name,
             email: user?.email,
           }}
           onSubmit={handleSubmit}
