@@ -16,6 +16,9 @@ interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
   isMasked?: boolean;
   format?: Function;
   containerStyle?: object;
+  showYearDropdown?: boolean;
+  yearDropdownItemNumber?: number;
+  scrollableYearDropdown?: boolean;
 }
 
 interface InputRefProps extends InputHTMLAttributes<HTMLInputElement> {
@@ -29,6 +32,9 @@ interface InputRefProps extends InputHTMLAttributes<HTMLInputElement> {
   format?: any;
   setIsFocused: Function;
   setIsFilled: Function;
+  showYearDropdown?: boolean;
+  yearDropdownItemNumber?: number;
+  scrollableYearDropdown?: boolean;
 }
 
 const InputDefault: React.FC<InputRefProps> = ({ maskRef, inputRef, name, isMasked, mask, placeholder, disabled, defaultValue, setIsFocused, setIsFilled, ...rest }) => {
@@ -69,7 +75,7 @@ const InputDefault: React.FC<InputRefProps> = ({ maskRef, inputRef, name, isMask
   );
 }
 
-const InputDatePicker: React.FC<InputRefProps> = ({ dateRef, name, placeholder, disabled, defaultValue, setIsFilled, setIsFocused }) => {
+const InputDatePicker: React.FC<InputRefProps> = ({ dateRef, name, placeholder, disabled, defaultValue, setIsFilled, setIsFocused, showYearDropdown, yearDropdownItemNumber, scrollableYearDropdown }) => {
   const dateParts = !!defaultValue ? defaultValue.split('-') : null;
   const [inputDate, setInputDate] = useState(!!dateParts ? new Date(+dateParts[2], dateParts[1] - 1, +dateParts[0]) : null);
 
@@ -107,6 +113,9 @@ const InputDatePicker: React.FC<InputRefProps> = ({ dateRef, name, placeholder, 
       disabledKeyboardNavigation={true}
       disabled={disabled}
       autoComplete='off'
+      showYearDropdown={showYearDropdown}
+      yearDropdownItemNumber={yearDropdownItemNumber}
+      scrollableYearDropdown={scrollableYearDropdown}
     />
   )
 }
@@ -120,6 +129,7 @@ const Input: React.FC<InputProps> = ({
   mask,
   format,
   containerStyle = {},
+  showYearDropdown, yearDropdownItemNumber, scrollableYearDropdown,
   ...rest
 }) => {
   const dateRef = useRef<ReactDatePicker>(null);
@@ -147,10 +157,6 @@ const Input: React.FC<InputProps> = ({
       },
     });
   }, [fieldName, registerField]);
-
-  useEffect(() => {
-    console.log(`Input Error: ${error}`)
-  }, [error])
 
   return (
     <div style={containerStyle}>

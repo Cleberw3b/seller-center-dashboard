@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
 import BulletedButton from '../../../components/BulletedButton';
 import Button from '../../../components/PrimaryButton';
@@ -8,72 +8,19 @@ import { useRouter } from 'next/router';
 
 import styles from './styles.module.scss';
 import { GetStaticProps } from 'next';
+import { Nationality } from 'src/shared/types/nationality';
+import { Category, SubCategory } from 'src/shared/types/category';
 
-enum ProductStatus {
-  Ativado = 0,
-  Desativado = 1,
-}
-
-type Product = {
-  id: any,
-  images: [
-    {
-      id: any,
-      name: string,
-      alt_text: string,
-      url: string,
-    }
-  ],
-  name: string,
-  description: string,
-  brand: string,
-  more_info?: string,
-  gender: string,
-  ean?: string,
-  sku: string,
-  height?: number,
-  width?: number,
-  length?: number,
-  weight?: number,
-
-  variations: [
-    {
-      type: 'number' | 'size',
-      value: number | string,
-      stock: number,
-      color: string,
-    }
-  ],
-
-  nationality: {
-    id: any,
-    name: string,
-  },
-  category: Category,
-}
-
-type Nationality = {
-  id: any,
-  name: string
-}
-
-type Category = {
-  id: any,
-  name: string,
-  sub_category: SubCategory[]
-}
-
-type SubCategory = {
-  id: any,
-  name: string,
-}
+import api from 'src/services/api';
+import { useLoading } from 'src/hooks/loading';
+import { useAuth } from 'src/hooks/auth';
+import { sub_categories } from 'src/shared/consts/category';
 
 interface CategoriesDTO {
   nationalities: Nationality[];
-  categories: Category[];
 }
 
-export function NewProduct({ nationalities: nationalitiesFromApi, categories: categoriesFromApi }: CategoriesDTO) {
+export function NewProduct({ nationalities: nationalitiesFromApi }: CategoriesDTO) {
 
   const [nationality, setNationality] = useState<Nationality>();
   const [category, setCategory] = useState<Category>();
@@ -81,6 +28,9 @@ export function NewProduct({ nationalities: nationalitiesFromApi, categories: ca
 
   const [nationalities, setNationalities] = useState([] as Nationality[]);
   const [categories, setCategories] = useState([] as Category[]);
+  const [subCategories, setSubCategories] = useState([] as SubCategory[]);
+
+  const { setLoading } = useLoading();
 
   const router = useRouter();
 
@@ -95,35 +45,59 @@ export function NewProduct({ nationalities: nationalitiesFromApi, categories: ca
   }, [process.browser]);
 
   useEffect(() => {
+    setLoading(true);
+
     setNationalities(nationalitiesFromApi);
-    setCategories(categoriesFromApi);
+
+    api.get('/category/all').then(response => {
+      setCategories(response.data)
+
+      setLoading(false)
+    }).catch(err => {
+      console.log(err)
+
+      setLoading(false)
+
+      return []
+    })
   }, [])
+
+  useEffect(() => {
+    if (!!category) {
+      setLoading(true);
+      setSubCategories(sub_categories.filter((sc: SubCategory) => sc.categoryCode === category.code))
+      setLoading(false);
+
+      // api.get(`/category/${category._id}/subcategory`).then(response => {
+      //   setSubCategories(response.data)
+
+      //   setLoading(false)
+      // }).catch(err => {
+
+      //   setLoading(false)
+      // })
+    }
+  }, [category])
 
   const handleNationality = useCallback((n: Nationality) => {
     nationality?.id === n.id ? setNationality(undefined) : setNationality(n)
   }, [nationality])
 
   const handleCategory = useCallback((c: Category) => {
-    category?.id === c.id ? setCategory(undefined) : setCategory(c)
+    category?.code === c.code ? setCategory(undefined) : setCategory(c)
   }, [category])
 
   const handleSubCategory = useCallback((sc: SubCategory) => {
-    subCategory?.id === sc.id ? setSubCategory(undefined) : setSubCategory(sc)
+    subCategory?.code === sc.code ? setSubCategory(undefined) : setSubCategory(sc)
   }, [subCategory]);
 
   const handleRegisterPage = useCallback(() => {
-    console.log({
-      nationality,
-      category,
-      subCategory
-    })
-
     router.push({
       pathname: 'create/product',
       query: {
         nationality: nationality?.id,
-        category: category?.id,
-        subCategory: subCategory?.id
+        category: category?.code,
+        subCategory: subCategory?.code
       }
     })
   }, [nationality, category, subCategory])
@@ -172,15 +146,15 @@ export function NewProduct({ nationalities: nationalitiesFromApi, categories: ca
               <div className={styles.categoriesContainer}>
                 <div className={styles.categoryContainer}>
                   {
-                    categories.map(c => (
+                    categories.map((c: Category) => (
                       <StateButton
-                        key={c.id}
+                        key={c.code}
                         onClick={() => handleCategory(c)}
-                        isActive={category?.id === c.id}
+                        isActive={category?.code === c.code}
                         pointer={(!!width && width >= 768)}
                         borders
                       >
-                        {c.name}
+                        {c.value}
                       </StateButton>
                     ))
                   }
@@ -188,30 +162,30 @@ export function NewProduct({ nationalities: nationalitiesFromApi, categories: ca
                 {
                   !!category && (
                     <div className={styles.subcategoryContainer}>
-                      <div className={styles.subCategories}>
-                        {
-                          category.sub_category.map(sc => (
-                            <Button
-                              key={sc.id}
-                              onClick={() => handleSubCategory(sc)}
-                              isActive={subCategory?.id === sc.id}
-                              customStyle={{ className: styles.subCategoryButton, activeClassName: styles.subCategoryActiveButton }}
-                            >
-                              {sc.name}
-                            </Button>
-                          ))
-                        }
-                      </div>
                       {
-                        (!!subCategory || category.sub_category.length === 0) && (
-                          <Button
-                            onClick={handleRegisterPage}
-                            customStyle={{ className: styles.createButton }}
-                          >
-                            Cadastrar Produto
-                          </Button>
+                        (!!subCategories && subCategories.length > 0) && (
+                          <div className={styles.subCategories}>
+                            {
+                              subCategories.map(sc => (
+                                <Button
+                                  key={sc.code}
+                                  onClick={() => handleSubCategory(sc)}
+                                  isActive={subCategory?.code === sc.code}
+                                  customStyle={{ className: styles.subCategoryButton, activeClassName: styles.subCategoryActiveButton }}
+                                >
+                                  {sc.value}
+                                </Button>
+                              ))
+                            }
+                          </div>
                         )
                       }
+                      <Button
+                        onClick={handleRegisterPage}
+                        customStyle={{ className: styles.createButton }}
+                      >
+                        Cadastrar Produto
+                      </Button>
                     </div>
                   )
                 }
@@ -224,176 +198,17 @@ export function NewProduct({ nationalities: nationalitiesFromApi, categories: ca
   )
 }
 
-const nationalityFromApi: Nationality[] = [
-  {
-    id: '1',
-    name: 'Nacional'
-  },
-  {
-    id: '2',
-    name: 'Internacional'
-  },
-]
-
-const categoriesFromApi: Category[] = [
-  {
-    id: '1',
-    name: 'Acessórios ',
-    sub_category: [
-      {
-        id: '1',
-        name: 'Acessórios de Cabelo',
-      },
-      {
-        id: '2',
-        name: 'Bolsas',
-      },
-      {
-        id: '3',
-        name: 'Chapéus',
-      },
-      {
-        id: '4',
-        name: 'Cintos',
-      },
-      {
-        id: '5',
-        name: 'Lenços',
-      },
-      {
-        id: '6',
-        name: 'Óculos',
-      },
-      {
-        id: '7',
-        name: 'Relógios',
-      },
-      {
-        id: '8',
-        name: 'Necessaires',
-      },
-      {
-        id: '9',
-        name: 'Malas e mochilas',
-      },
-      {
-        id: '10',
-        name: 'Eletrônicos',
-      },
-      {
-        id: '11',
-        name: 'Bijoux',
-      },
-    ]
-  },
-  {
-    id: '3',
-    name: 'Acessórios ',
-    sub_category: [
-      {
-        id: '1',
-        name: 'Acessórios de Cabelo',
-      },
-      {
-        id: '2',
-        name: 'Bolsas',
-      },
-      {
-        id: '3',
-        name: 'Chapéus',
-      },
-      {
-        id: '4',
-        name: 'Cintos',
-      },
-      {
-        id: '5',
-        name: 'Lenços',
-      },
-      {
-        id: '6',
-        name: 'Óculos',
-      },
-      {
-        id: '7',
-        name: 'Relógios',
-      },
-      {
-        id: '8',
-        name: 'Necessaires',
-      },
-      {
-        id: '9',
-        name: 'Malas e mochilas',
-      },
-      {
-        id: '10',
-        name: 'Eletrônicos',
-      },
-      {
-        id: '11',
-        name: 'Bijoux',
-      },
-    ]
-  },
-  {
-    id: '2',
-    name: 'Acessórios ',
-    sub_category: [
-      {
-        id: '1',
-        name: 'Acessórios de Cabelo',
-      },
-      {
-        id: '2',
-        name: 'Bolsas',
-      },
-      {
-        id: '3',
-        name: 'Chapéus',
-      },
-      {
-        id: '4',
-        name: 'Cintos',
-      },
-      {
-        id: '5',
-        name: 'Lenços',
-      },
-      {
-        id: '6',
-        name: 'Óculos',
-      },
-      {
-        id: '7',
-        name: 'Relógios',
-      },
-      {
-        id: '8',
-        name: 'Necessaires',
-      },
-      {
-        id: '9',
-        name: 'Malas e mochilas',
-      },
-      {
-        id: '10',
-        name: 'Eletrônicos',
-      },
-      {
-        id: '11',
-        name: 'Bijoux',
-      },
-    ]
-  },
-]
-
 export default NewProduct;
 
 export const getStaticProps: GetStaticProps = async ({ }) => {
   const data: CategoriesDTO = {
-    nationalities: nationalityFromApi,
-    categories: categoriesFromApi,
+    nationalities: [{
+      id: '1',
+      name: 'Nacional',
+    }, {
+      id: '2',
+      name: 'Internacional',
+    }],
   };
 
   return ({

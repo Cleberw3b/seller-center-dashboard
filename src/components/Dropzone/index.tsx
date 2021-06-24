@@ -67,16 +67,11 @@ const Dropzone: React.FC<Props> = ({ name, onFileUploaded, filesUrl, setFilesUrl
         setFilesUrl([]);
       },
       setValue: (ref: InputRefProps, value) => {
-        console.log(value);
         ref.acceptedFiles = value;
         setFilesUrl(value);
       },
     });
   }, [fieldName, registerField]);
-
-  useEffect(() => {
-    console.log(error)
-  }, [error])
 
   return (
     <div className='dropzone' {...getRootProps()} onClick={() => dropZoneRef.current?.click()}>

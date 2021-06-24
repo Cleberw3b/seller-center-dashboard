@@ -13,45 +13,14 @@ import RadioButtonGroup from '../../../../components/RadioButtonGroup';
 import VariationsController from '../../../../components/Variations';
 import getValidationErrors from '../../../../utils/getValidationErrors';
 
-import { FiChevronLeft, FiX } from 'react-icons/fi';
+import { FiChevronLeft } from 'react-icons/fi';
 
 import styles from './styles.module.scss'
 
-import { format } from 'date-fns';
 import api from 'src/services/api';
 import { useAuth } from 'src/hooks/auth';
-
-export type Product = {
-  images: {
-    id: any,
-    name: string,
-    alt_text: string,
-    url: string,
-  }[],
-  name: string,
-  description: string,
-  brand: string,
-  more_info?: string,
-  ean?: string,
-  sku: string,
-  gender: string,
-  price: number,
-  price_discounted?: number;
-  height?: number,
-  width?: number,
-  length?: number,
-  weight?: number,
-
-  variations: {
-    size: number | string,
-    stock: number,
-    color: string,
-  }[],
-
-  nationality: string,
-  category: string,
-  sub_category: string,
-}
+import { Product } from 'src/shared/types/product';
+import TextArea from 'src/components/Textarea';
 
 export function ProductForm() {
   const [files, setFiles] = useState<File[]>([]);
@@ -313,26 +282,23 @@ export function ProductForm() {
                 autoComplete='off'
               />
               <Input
+                name='brand'
+                label='Marca'
+                placeholder='Insira a marca'
+                autoComplete='off'
+              />
+
+            </div>
+
+            <div className={styles.singleInputContainer}>
+              <TextArea
                 name='description'
                 label='Descrição do produto'
                 placeholder='Insira a descrição do produto'
                 autoComplete='off'
               />
             </div>
-            <div className={styles.doubleInputContainer}>
-              <Input
-                name='brand'
-                label='Marca'
-                placeholder='Insira a marca'
-                autoComplete='off'
-              />
-              <Input
-                name='more_info'
-                label='Mais informações (opcional)'
-                placeholder='Informações adicionais do produto'
-                autoComplete='off'
-              />
-            </div>
+
             <div className={styles.titledContainer}>
               <p className={styles.title}>Selecione o gênero</p>
               <RadioButtonGroup
@@ -379,25 +345,25 @@ export function ProductForm() {
               <Input
                 name='height'
                 label='Alturam (cm)'
-                placeholder='Altura do produto'
+                placeholder='Altura da embalagem'
                 autoComplete='off'
               />
               <Input
                 name='width'
                 label='Largura (cm)'
-                placeholder='Largura do produto'
+                placeholder='Largura da embalagem'
                 autoComplete='off'
               />
               <Input
                 name='length'
                 label='Comprimento (cm)'
-                placeholder='Comprimento do produto'
+                placeholder='Comprimento da embalagem'
                 autoComplete='off'
               />
               <Input
                 name='weight'
                 label='Peso (kg)'
-                placeholder='Peso do produto'
+                placeholder='Peso total'
                 autoComplete='off'
               />
             </div>

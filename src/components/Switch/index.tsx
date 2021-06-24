@@ -16,8 +16,6 @@ const Switch = ({ id, item, handleToggle, isOn, onColor, offColor, ...rest }: Sw
 
   const inputRef = useRef<HTMLInputElement>(null);
 
-  console.log(item.id);
-
   return (
     <>
       <input

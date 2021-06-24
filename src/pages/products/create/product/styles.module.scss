@@ -103,9 +103,13 @@
       }
     }
 
-    .doubleInputContainer {
-      // flex: 1;
+    .singleInputContainer {
+      flex: 1;
 
+      margin-top: 1rem;
+    }
+
+    .doubleInputContainer {
       flex: 1;
 
       display: flex;

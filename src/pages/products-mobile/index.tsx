@@ -1,51 +1,24 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { GetStaticProps } from "next";
+import { useRouter } from 'next/router';
+import { MuiThemeProvider, createMuiTheme, Switch } from '@material-ui/core';
 import { FormHandles } from '@unform/core';
 import { Form } from '@unform/web';
 import { format } from 'date-fns';
 import { FiSearch, FiCameraOff, FiEdit } from 'react-icons/fi';
 
+import api from 'src/services/api';
+import { useAuth, User } from 'src/hooks/auth';
 import BulletedButton from '../../components/BulletedButton';
 import FilterInput from '../../components/FilterInput';
 
-import { useRouter } from 'next/router';
-
-import { Switch } from '@material-ui/core';
+import { ProductSummary as Product } from 'src/shared/types/product';
 
 import styles from './styles.module.scss';
 import switchStyles from './switch-styles.module.scss';
-
-import { MuiThemeProvider, createMuiTheme } from '@material-ui/core';
-import { useAuth, User } from 'src/hooks/auth';
-import api from 'src/services/api';
-
-enum ProductStatus {
-  Ativado = 0,
-  Desativado = 1,
-}
-
-type Variation = {
-  size: number | string,
-  stock: number,
-  color: string,
-}
-
-type Product = {
-  id: string;
-  status: ProductStatus;
-  name: string;
-  brand: string;
-  sku: string;
-  price: number;
-  stock: number;
-  images?: string[];
-  variations: Variation[];
-}
-
 interface SearchFormData {
   search: string;
 }
-
 interface ProductsProps {
   products: Product[];
 }
@@ -93,11 +66,9 @@ export function Products({ userFromApi }: ProductsProps) {
         productsDto = productsDto.map(product => {
           let stockCount = 0;
 
-          console.log(product);
-
           if (!!product.variations && Array.isArray(product.variations)) {
             product.variations.forEach(variation => {
-              stockCount += variation.stock as number;
+              stockCount += Number(variation.stock);
             })
           }
 
@@ -150,19 +121,20 @@ export function Products({ userFromApi }: ProductsProps) {
     [search],
   );
 
-  const handleAvailability = useCallback((id: string) => {
-    console.log(id);
+  const handleAvailability = useCallback(async (id: string) => {
+    const index = products.findIndex(product => product._id === id);
 
-    const updatedItems = items.map(i => {
-      if (i.id === id)
-        return { ...i, status: i.status === ProductStatus.Ativado ? ProductStatus.Desativado : ProductStatus.Ativado };
+    console.log(`Id: ${id}`)
 
-      return i;
+    await api.patch(`/product/${id}`, {
+      isActive: !products[index].isActive
+    }).then(response => {
+      console.log(response.data)
+      // products[index].isActive === response.data.isActive;
+    }).catch(err => {
+      console.log(err)
     })
-
-    setItems(updatedItems);
-
-  }, [items]);
+  }, [items, products]);
 
   return (
     <div className={styles.productsContainer}>
@@ -220,19 +192,19 @@ export function Products({ userFromApi }: ProductsProps) {
                   </div>
                 </div>
                 <div className={styles.switchContainer}>
-                  {/* <MuiThemeProvider theme={theme}>
+                  <MuiThemeProvider theme={theme}>
                     <Switch
-                      checked={item.status !== ProductStatus.Ativado}
-                      onChange={() => handleAvailability(item.id)}
+                      checked={item.isActive}
+                      onChange={() => handleAvailability(item._id)}
                       classes={{
                         root: switchStyles.root,
-                        thumb: item.status !== ProductStatus.Ativado ? switchStyles.thumb : switchStyles.thumbUnchecked,
-                        track: item.status !== ProductStatus.Ativado ? switchStyles.track : switchStyles.trackUnchecked,
+                        thumb: item.isActive ? switchStyles.thumb : switchStyles.thumbUnchecked,
+                        track: item.isActive ? switchStyles.track : switchStyles.trackUnchecked,
                         checked: switchStyles.checked,
                       }}
                     />
                   </MuiThemeProvider>
-                  <span className={styles.switchSubtitle}>{item.status !== ProductStatus.Ativado ? 'Ativado' : 'Desativado'}</span> */}
+                  <span className={styles.switchSubtitle}>{item.isActive ? 'Ativado' : 'Desativado'}</span>
                   <div className={styles.stockContainer}>
                     <span className={item.stock > 0 ? styles.stock : styles.outStock}>{new Intl.NumberFormat('pt-BR').format(item.stock)}</span>
                     <span>Em estoque</span>

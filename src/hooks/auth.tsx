@@ -2,6 +2,7 @@ import React, { createContext, useCallback, useState, useContext, useMemo } from
 import api from '../services/api';
 import jwt_decode from "jwt-decode";
 import { InactiveUserError } from 'src/shared/errors/InactiveUserError';
+import { CompanyInfo, PersonInfo } from 'src/shared/types/personalInfo';
 
 interface ApiToken {
   auth: boolean;
@@ -14,13 +15,12 @@ export interface User {
   email: string,
   isActive: boolean,
 
-  personalInfo: {
-    firstName: string,
-    lastName: string,
-    cpf: string,
-    rg: string,
-    birthday?: string,
-  }
+  userType: 'f' | 'j' | '',
+  personalInfo: PersonInfo | CompanyInfo,
+
+  contact: {
+    phone: string,
+  },
 
   address: {
     address: string,
@@ -28,7 +28,7 @@ export interface User {
     complement?: string,
     district: string,
     city: string,
-  }
+  },
 
   // phone?: string,
 
@@ -37,9 +37,11 @@ export interface User {
 
   bankInfo: {
     bank: string,
+    name: string,
     account: string,
     agency: string,
-  }
+    pix?: string,
+  },
 
   shopInfo: {
     _id?: string,
@@ -51,7 +53,7 @@ export interface User {
     // city: string,
     // complement: string,
     // number: number,
-  }
+  },
 }
 
 interface AuthState {
@@ -87,7 +89,6 @@ const AuthProvider: React.FC = ({ children }) => {
         api.defaults.headers.authorization = token;
 
         const decodedToken = jwt_decode(token) as Token;
-        console.log(decodedToken);
 
         return { token, user: JSON.parse(user) };
       }
@@ -110,7 +111,8 @@ const AuthProvider: React.FC = ({ children }) => {
     api.defaults.headers.authorization = token;
 
     await api.get('/account/detail').then(response => {
-      user = { ...user, ...response.data }
+      console.log({ ...response.data })
+      user = { ...user, ...response.data, userType: !!response.data.personalInfo['isPF'] ? 'f' : 'j' }
 
       if (!user.isActive) {
         throw new InactiveUserError("Usuário inativado, login não pode ser realizado.");
@@ -168,7 +170,7 @@ const AuthProvider: React.FC = ({ children }) => {
 
   const isRegisterCompleted = useMemo(() => {
     if (!!data.user) {
-      return !!data.user.personalInfo && !!data.user.shopInfo && !!data.user.personalInfo.firstName && !!data.user.personalInfo.lastName && !!data.user.personalInfo.cpf && !!data.user.personalInfo.rg && !!data.user.shopInfo.name
+      // return !!data.user.personalInfo && !!data.user.shopInfo && !!data.user.personalInfo.firstName && !!data.user.personalInfo.lastName && !!data.user.personalInfo.cpf && !!data.user.personalInfo.rg && !!data.user.shopInfo.name
     }
 
     return true

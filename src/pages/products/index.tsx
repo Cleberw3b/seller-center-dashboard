@@ -1,46 +1,19 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-// import GetInitialProps from "next";
+import { useRouter } from 'next/router';
+import { MuiThemeProvider, createMuiTheme, Switch } from '@material-ui/core';
 import { FormHandles } from '@unform/core';
 import { Form } from '@unform/web';
-import { isSameDay, isSameWeek, isSameMonth, parse, format } from 'date-fns';
-import { FiSearch, FiCameraOff, FiEdit } from 'react-icons/fi';
+import { FiSearch, FiCameraOff } from 'react-icons/fi';
 
+import api from 'src/services/api';
+import { useAuth, User } from 'src/hooks/auth';
 import BulletedButton from '../../components/BulletedButton';
 import FilterInput from '../../components/FilterInput';
 
-import { useRouter } from 'next/router';
-
-import { Switch } from '@material-ui/core';
+import { ProductSummary as Product } from 'src/shared/types/product';
 
 import styles from './styles.module.scss';
 import switchStyles from './switch-styles.module.scss';
-
-import { MuiThemeProvider, createMuiTheme } from '@material-ui/core';
-import api from 'src/services/api';
-import { useAuth, User } from 'src/hooks/auth';
-
-enum ProductStatus {
-  Ativado = 0,
-  Desativado = 1,
-}
-
-type Variation = {
-  size: number | string,
-  stock: number,
-  color: string,
-}
-
-type Product = {
-  id: string;
-  status: ProductStatus;
-  name: string;
-  brand: string;
-  sku: string;
-  price: number;
-  stock: number;
-  images?: string[];
-  variations: Variation[];
-}
 
 interface SearchFormData {
   search: string;
@@ -70,10 +43,10 @@ export function Products({ userFromApi }: ProductsProps) {
   const { token, user, updateUser } = useAuth();
 
   useEffect(() => {
-    !!userFromApi && updateUser({ ...user, shopInfo: { ...user.shopInfo, _id: userFromApi.shopInfo._id } })
+    // !!userFromApi && updateUser({ ...user, shopInfo: { ...user.shopInfo, _id: userFromApi.shopInfo._id } })
   }, [userFromApi])
 
-  // const itemsRef = useMemo(() => Array(items.length).fill(0).map(i => React.createRef<HTMLInputElement>()), [items]);
+  const itemsRef = useMemo(() => Array(items.length).fill(0).map(i => React.createRef<HTMLInputElement>()), [items]);
 
   const formRef = useRef<FormHandles>(null);
   const [error, setError] = useState('');
@@ -82,7 +55,18 @@ export function Products({ userFromApi }: ProductsProps) {
 
   useEffect(() => {
     setLoading(true);
+    api.get('/account/detail').then(response => {
+      updateUser({ ...user, shopInfo: { ...user.shopInfo, _id: response.data.shopInfo._id } })
+      setLoading(false);
+      // return response.data as User;
+    }).catch(err => {
+      console.log(err)
+      setLoading(false);
+    });
+  }, [])
 
+  useEffect(() => {
+    setLoading(true);
 
     setItems(products.filter(product => {
       return (!!product.name && (search === '' || product.name.toLowerCase().includes(search.toLowerCase())));
@@ -93,24 +77,25 @@ export function Products({ userFromApi }: ProductsProps) {
 
   useEffect(() => {
     if (!!user) {
+      setLoading(true);
+
       api.get('/product', {
         headers: {
           authorization: token,
           shop_id: user.shopInfo._id,
         }
       }).then(response => {
-        // console.log(response.data)
+
+        console.log(response.data)
 
         let productsDto = response.data as Product[];
 
         productsDto = productsDto.map(product => {
-          let stockCount = 0;
+          let stockCount: number = 0;
 
-          console.log(product);
-
-          if (!!product.variations && Array.isArray(product.variations)) {
+          if (!!product.variations) {
             product.variations.forEach(variation => {
-              stockCount += variation.stock as number;
+              stockCount = stockCount + Number(variation.stock);
             })
           }
 
@@ -122,17 +107,20 @@ export function Products({ userFromApi }: ProductsProps) {
 
         setProducts(productsDto)
         setItems(productsDto)
+
+        setLoading(false);
       }).catch((error) => {
         console.log(error)
         setProducts([]);
         setItems([])
+
+        setLoading(false);
       })
     }
   }, [user]);
 
   const handleSubmit = useCallback(
     async (data: SearchFormData) => {
-      console.log(`Search: ${search} | ${data.search}`)
       try {
         formRef.current?.setErrors({});
 
@@ -147,23 +135,20 @@ export function Products({ userFromApi }: ProductsProps) {
     [search],
   );
 
-  const handleAvailability = useCallback((id: string) => {
-    console.log(id);
+  const handleAvailability = useCallback(async (id: string) => {
+    const index = products.findIndex(product => product._id === id);
 
-    const updatedItems = items.map(i => {
-      if (i.id === id)
-        return { ...i, status: i.status === ProductStatus.Ativado ? ProductStatus.Desativado : ProductStatus.Ativado };
+    console.log(`Id: ${id}`)
 
-      return i;
+    await api.patch(`/product/${id}`, {
+      isActive: !products[index].isActive
+    }).then(response => {
+      console.log(response.data)
+      // products[index].isActive === response.data.isActive;
+    }).catch(err => {
+      console.log(err)
     })
-
-    setItems(updatedItems);
-
-  }, [items]);
-
-  useEffect(() => {
-    console.log(items);
-  }, [items])
+  }, [items, products]);
 
   return (
     <div className={styles.productsContainer}>
@@ -206,13 +191,13 @@ export function Products({ userFromApi }: ProductsProps) {
                   <th>SKU</th>
                   <th>Valor</th>
                   <th>Estoque</th>
-                  {/* <th>Status</th>
-                  <th>Ação</th> */}
+                  <th>Status</th>
+                  {/* <th>Ação</th> */}
                 </tr>
               </thead>
               <tbody className={styles.tableBody}>
                 {items.map((item, i) => (
-                  <tr className={styles.tableItem} key={item.id}>
+                  <tr className={styles.tableItem} key={i}>
                     <td id={styles.imgCell} >
                       {!!item.images ? <img src={item.images[0]} alt={item.name} /> : <FiCameraOff />}
                     </td>
@@ -237,22 +222,23 @@ export function Products({ userFromApi }: ProductsProps) {
                     <td className={item.stock <= 0 ? styles.redText : ''}>
                       {new Intl.NumberFormat('pt-BR').format(item.stock)}
                     </td>
-                    {/* <td id={styles.switchCell}>
+                    <td id={styles.switchCell}>
                       <MuiThemeProvider theme={theme}>
                         <Switch
-                          checked={item.status !== ProductStatus.Ativado}
-                          onChange={() => handleAvailability(item.id)}
+                          inputRef={itemsRef[i]}
+                          checked={item.isActive}
+                          onChange={() => handleAvailability(item._id)}
                           classes={{
                             root: switchStyles.root,
-                            thumb: item.status !== ProductStatus.Ativado ? switchStyles.thumb : switchStyles.thumbUnchecked,
-                            track: item.status !== ProductStatus.Ativado ? switchStyles.track : switchStyles.trackUnchecked,
+                            thumb: item.isActive ? switchStyles.thumb : switchStyles.thumbUnchecked,
+                            track: item.isActive ? switchStyles.track : switchStyles.trackUnchecked,
                             checked: switchStyles.checked,
                           }}
                         />
                       </MuiThemeProvider>
-                      <span className={styles.switchSubtitle}>{item.status !== ProductStatus.Ativado ? 'Ativado' : 'Desativado'}</span>
+                      <span className={styles.switchSubtitle}>{item.isActive ? 'Ativado' : 'Desativado'}</span>
                     </td>
-                    <td id={styles.editCell}>
+                    {/* <td id={styles.editCell}>
                       <div onClick={() => {
                         router.push({
                           pathname: 'products/edit',
@@ -280,15 +266,8 @@ export function Products({ userFromApi }: ProductsProps) {
 }
 
 export const getInitialProps = async () => {
-  const user = api.get('/account/detail').then(response => {
-    return response.data as User;
-  }).catch(err => {
-    console.log(err)
-  });
-
   return ({
     props: {
-      userFromApi: user
     },
     revalidate: 10
   });

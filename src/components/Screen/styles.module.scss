@@ -27,3 +27,34 @@
 
   overflow: hidden;
 }
+
+.modalContent {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+
+  align-items: center;
+
+  .loader {
+    align-self: center;
+    border: 1rem solid var(--gray-100);
+    border-top: 1rem solid var(--grafite);
+    border-radius: 50%;
+    width: 6.5rem;
+    height: 6.5rem;
+    animation: spin 2s linear infinite;
+  }
+
+  p {
+    font-size: 1.25rem;
+    font-weight: bold;
+    color: var(--grafite);
+  }
+
+  > svg {
+    width: 5rem;
+    height: 5rem;
+
+    margin-bottom: 2rem;
+  }
+}

@@ -6,6 +6,9 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { FaPlus } from 'react-icons/fa';
 
 import styles from './styles.module.scss';
+import api from 'src/services/api';
+import { useLoading } from 'src/hooks/loading';
+import Autocomplete from '../Autocomplete';
 
 type Variation = {
   size?: number | string,
@@ -27,6 +30,10 @@ const VariationsController: React.FC<VariationsControllerProps> = ({ name, initi
   const { fieldName, registerField, defaultValue = [{}] } = useField(name);
 
   const [variations, setVariations] = useState<Variation[]>((!!initial_vars && initial_vars.length) > 0 ? initial_vars : defaultValue);
+  const [sizes, setSizes] = useState<string[]>([]);
+  const [colors, setColors] = useState<string[]>([]);
+
+  const { setLoading } = useLoading();
 
   const handleAddVariation = useCallback(() => {
     setVariations([...variations, {}])
@@ -42,6 +49,24 @@ const VariationsController: React.FC<VariationsControllerProps> = ({ name, initi
       height: undefined,
     }
   }, [process.browser]);
+
+  useEffect(() => {
+    setLoading(true)
+
+    api.get('/size/all').then(response => {
+      setSizes(response.data)
+    }).catch((err) => {
+      console.log(err);
+    })
+
+    api.get('/color/all').then(response => {
+      setColors(response.data)
+      setLoading(false)
+    }).catch((err) => {
+      console.log(err)
+      setLoading(false)
+    })
+  }, [])
 
   useEffect(() => {
     registerField({
@@ -71,10 +96,10 @@ const VariationsController: React.FC<VariationsControllerProps> = ({ name, initi
                 <span>Variação {i + 1}</span>
                 {(!!width && width < 768) ? (
                   <div className={styles.fieldsContainer}>
-                    <Input
-                      name='size'
-                      label={'Tamanho/medida'}
-                      placeholder='Tamanho/medida'
+                    <Autocomplete
+                      name={'size'}
+                      items={sizes}
+                      placeholder='Tamalho/medida'
                       autoComplete='off'
                     />
                     <Input
@@ -83,17 +108,20 @@ const VariationsController: React.FC<VariationsControllerProps> = ({ name, initi
                       placeholder='Quantidade em estoque'
                       autoComplete='off'
                     />
-                    <Dropdown
-                      name='color'
-                      label='Escolha a cor'
-                      options={[{ value: 'blue', label: 'Azul' }, { value: 'yellow', label: 'Amarela' }, { value: 'black', label: 'Preta' }, { value: 'pink', label: 'Rosa' }, { value: 'red', label: 'Vermelha' }, { value: 'Green', label: 'Verde' }, { value: 'other', label: 'Outra' }]} />
+                    <Autocomplete
+                      name={'color'}
+                      items={colors}
+                      placeholder='Escolha a cor'
+                      autoComplete='off'
+                    />
                   </div>
                 ) : (
                   <>
-                    <Input
-                      name='size'
-                      label={'Tamanho/medida'}
-                      placeholder='Tamanho/medida'
+                    <Autocomplete
+                      name={'size'}
+                      items={sizes}
+                      label='Tamanho/medida'
+                      placeholder='Tamalho/medida'
                       autoComplete='off'
                     />
                     <Input
@@ -102,10 +130,13 @@ const VariationsController: React.FC<VariationsControllerProps> = ({ name, initi
                       placeholder='Quantidade em estoque'
                       autoComplete='off'
                     />
-                    <Dropdown
-                      name='color'
-                      label='Escolha a cor'
-                      options={[{ value: 'blue', label: 'Azul' }, { value: 'yellow', label: 'Amarela' }, { value: 'black', label: 'Preta' }, { value: 'pink', label: 'Rosa' }, { value: 'red', label: 'Vermelha' }, { value: 'Green', label: 'Verde' }, { value: 'other', label: 'Outra' }]} />
+                    <Autocomplete
+                      name={'color'}
+                      items={colors}
+                      label='Cor'
+                      placeholder='Escolha a cor'
+                      autoComplete='off'
+                    />
                   </>
                 )}
               </div>

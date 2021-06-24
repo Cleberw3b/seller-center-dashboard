@@ -1,9 +1,19 @@
+.parent {
+  width: 100%;
+
+  align-self: center;
+
+  position: relative;
+}
+
 .container {
-  margin: 0.25rem;
+  width: 100%;
+
+  text-align: left;
 
   padding: 0.5rem 0.75rem;
 
-  background: #FFFFFF;
+  background: var(--white);
   border-radius: 4px;
   box-shadow: 0 0 24px rgba(0,0,0,0.05), 0 0 6px rgba(0,0,0,0.1);
 
@@ -21,85 +31,11 @@
     }
 
     input {
-      width: 100%;
-
       color: var(--grafite);
-      background: transparent;
-      border: 0;
 
-      &::placeholder {
-        color: var(--grafite);
-        opacity: .75;
-      }
-    }
-  }
-}
-
-.containerDisabled {
-  margin: 0.25rem;
-
-  padding: 0.5rem 0.75rem;
-
-  background: var(--gray-100);
-  border-radius: 4px;
-  box-shadow: 0 0 24px rgba(0,0,0,0.05), 0 0 6px rgba(0,0,0,0.1);
-
-  opacity: 0.9;
-
-  transition: border-color 0.5s, color 0.5s, box-shadow 0.5s, opacity 0.5s;
-
-  div {
-    width: 100%;
-
-    opacity: 0.5;
-
-    label {
-      color: var(--gray-250);
-      font-size: .73rem;
-
-      margin-top: -.5rem;
-      margin-bottom: 0.25rem;
-    }
-
-    input {
-      color: var(--grafite);
       width: 100%;
-      background: transparent;
-      border: 0;
+      height: 100%;
 
-      &::placeholder {
-        color: var(--grafite);
-        opacity: .75;
-      }
-    }
-  }
-}
-
-.containerError {
-  margin: 0.25rem;
-
-  padding: 0.5rem 0.75rem;
-
-  background: #FFFFFF;
-  border-radius: 4px;
-  box-shadow: 0 0 24px var(--red-100-40), 0 0 6px var(--red-100-60);
-
-  transition: border-color 0.4s, color 0.4s, box-shadow 0.4s;
-
-  div {
-    width: 100%;
-
-    label {
-      color: var(--red-100);
-      font-size: .73rem;
-
-      margin-top: -.5rem;
-      margin-bottom: 0.25rem;
-    }
-
-    input {
-      color: var(--grafite);
-      width: 100%;
       background: transparent;
       border: 0;
 
@@ -112,13 +48,15 @@
 }
 
 .containerFocused {
-  margin: 0.25rem;
+  width: 100%;
+
+  text-align: left;
 
   padding: 0.5rem 0.75rem;
 
   background: #FFFFFF;
   border-radius: 4px;
-  box-shadow: 0 0 20px var(--yellow-300-40), 0 0 6px var(--yellow-300-60);
+  box-shadow: 0 0 24px var(--yellow-300-40), 0 0 6px var(--yellow-300-60);
 
   transition: border-color 0.4s, color 0.4s, box-shadow 0.4s;
 
@@ -126,7 +64,7 @@
     width: 100%;
 
     label {
-      color: var(--gray-300);
+      color: var(--gray-250);
       font-size: .73rem;
 
       margin-top: -.5rem;
@@ -135,7 +73,10 @@
 
     input {
       color: var(--grafite);
+
       width: 100%;
+      height: 100%;
+
       background: transparent;
       border: 0;
 
@@ -148,7 +89,9 @@
 }
 
 .containerFilled {
-  margin: 0.25rem;
+  width: 100%;
+
+  text-align: left;
 
   overflow:visible;
 
@@ -157,7 +100,7 @@
   background: #FFFFFF;
   border-radius: 4px;
 
-  box-shadow: 0 0 20px var(--green-100-40), 0 0 6px var(--green-100-40);
+  box-shadow: 0 0 24px var(--green-100-40), 0 0 6px var(--green-100-40);
 
   transition: border-color 0.4s, color 0.4s, box-shadow 0.4s;
 
@@ -165,7 +108,7 @@
     width: 100%;
 
     label {
-      color: var(--gray-300);
+      color: var(--gray-250);
       font-size: .73rem;
 
       margin-top: -.5rem;
@@ -174,7 +117,10 @@
 
     input {
       color: var(--grafite);
+
       width: 100%;
+      height: 100%;
+
       background: transparent;
       border: 0;
 
@@ -186,6 +132,46 @@
   }
 }
 
+.containerError {
+  width: 100%;
+
+  text-align: left;
+
+  padding: 0.5rem 0.75rem;
+
+  background: var(--white);
+  border-radius: 4px;
+  box-shadow: 0 0 20px var(--red-100-40), 0 0 6px var(--red-100-60);
+
+  transition: border-color 0.4s, color 0.4s, box-shadow 0.4s;
+
+  div {
+    width: 100%;
+
+    label {
+      color: var(--gray-250);
+      font-size: .73rem;
+
+      margin-top: -.5rem;
+      margin-bottom: 0.25rem;
+    }
+
+    input {
+      color: var(--grafite);
+
+      width: 100%;
+      height: 100%;
+
+      background: transparent;
+      border: 0;
+
+      &::placeholder {
+        color: var(--grafite);
+        opacity: .75;
+      }
+    }
+  }
+}
 
 .error {
   width: 100%;
@@ -195,5 +181,42 @@
   text-align: left;
 
   padding-left: 1rem;
-  margin-bottom: 0.5rem;
+  margin-top: 0.25rem;
+}
+
+.suggestions {
+  // display: flex;
+  // flex-direction: column;
+
+  position: absolute;
+
+  margin-top: -.12rem;
+  background: var(--white);
+
+  list-style-type: none;
+  z-index: 3;
+
+  border-radius: 0 0 6px 6px;
+
+  box-shadow: 0 .6rem 10px rgba(0,0,0,0.19), 0 0.6rem 6px rgba(0,0,0,0.23);
+
+  li {
+    width: 100%;
+    padding: 1rem;
+
+    background-color: var(--white);
+    color: var(--grafite);
+
+    cursor: pointer;
+
+    transition: background-color 0.5s;
+
+    &:hover {
+      background-color: var(--yellow-300-40);
+    }
+  }
+
+  .divider {
+    border-bottom: 1px var(--gray-250) solid;
+  }
 }

@@ -63,22 +63,6 @@
   > div + div {
     margin-top: .75rem;
   }
-
-  .doubleField {
-    display: grid;
-    grid-template-columns: 1fr .75fr;
-    column-gap: 1rem;
-
-    @media (max-width: 1250px) {
-      display: inline-block;
-
-      width: 100%;
-
-      > div + div {
-        margin-top: .75rem;
-      }
-    }
-  }
 }
 
 .flowUnset {
@@ -89,22 +73,6 @@
 
   > div + div {
     margin-top: .75rem;
-  }
-
-  .doubleField {
-    display: grid;
-    grid-template-columns: 1fr .75fr;
-    column-gap: 1rem;
-
-    @media (max-width: 1250px) {
-      display: inline-block;
-
-      width: 100%;
-
-      > div + div {
-        margin-top: .75rem;
-      }
-    }
   }
 }
 
@@ -118,22 +86,6 @@
   > div + div {
     margin-top: .75rem;
   }
-
-  .doubleField {
-    display: grid;
-    grid-template-columns: 1fr .75fr;
-    column-gap: 1rem;
-
-    @media (max-width: 1250px) {
-      display: inline-block;
-
-      width: 100%;
-
-      > div + div {
-        margin-top: .75rem;
-      }
-    }
-  }
 }
 
 .flowAppearFromLeft {
@@ -143,22 +95,6 @@
 
   > div + div {
     margin-top: .75rem;
-  }
-
-  .doubleField {
-    display: grid;
-    grid-template-columns: 1fr .75fr;
-    column-gap: 1rem;
-
-    @media (max-width: 1250px) {
-      display: inline-block;
-
-      width: 100%;
-
-      > div + div {
-        margin-top: .75rem;
-      }
-    }
   }
 }
 
@@ -171,22 +107,6 @@
   > div + div {
     margin-top: .75rem;
   }
-
-  .doubleField {
-    display: grid;
-    grid-template-columns: 1fr .75fr;
-    column-gap: 1rem;
-
-    @media (max-width: 1250px) {
-      display: inline-block;
-
-      width: 100%;
-
-      > div + div {
-        margin-top: .75rem;
-      }
-    }
-  }
 }
 
 .flowDisappearFromLeft {
@@ -198,21 +118,41 @@
   > div + div {
     margin-top: .75rem;
   }
+}
 
-  .doubleField {
-    display: grid;
-    grid-template-columns: 1fr .75fr;
-    column-gap: 1rem;
+.doubleField {
+  display: grid;
+  grid-template-columns: 1fr 0.2fr;
+  column-gap: 1rem;
 
-    @media (max-width: 1250px) {
-      display: inline-block;
+  @media (max-width: 1250px) {
+    display: inline-block;
 
-      width: 100%;
+    width: 100%;
 
-      > div + div {
-        margin-top: .75rem;
-      }
+    > div + div {
+      margin-top: .75rem;
     }
+  }
+}
+
+.typeButtonsContainer {
+  align-self: center;
+  justify-self: center;
+
+  display: flex;
+  flex-direction: column;
+
+  align-items: center;
+  justify-content: center;
+
+  .buttons {
+    display: flex;
+    column-gap: 2rem;
+
+    height: 13rem;
+
+    margin-top: 3rem;
   }
 }
 
@@ -227,10 +167,10 @@
     height: calc(100vh - 5rem);
   }
 
-  padding: 2rem;
+  display: grid;
+  grid-template-areas: 'all';
 
-  display: flex;
-  flex-direction: column;
+  // flex-direction: column;
 
   overflow: auto;
 
@@ -254,8 +194,24 @@
     }
   }
 
+  .loadingContainer {
+    grid-area: all;
+
+    // background: radial-gradient(var(--gray-250), transparent 75%, transparent);
+    background: var(--gray-100);
+    opacity: 0.75;
+
+    z-index: 10;
+  }
+
   .profileContent {
-    flex: 1;
+    grid-area: all;
+
+    padding: 2rem;
+
+    // flex: 1;
+    // width: 100%;
+    // height: 100%;
 
     display: flex;
     flex-direction: column;
@@ -289,6 +245,7 @@
 
       .controllerContainer {
         width: 100%;
+        height: 100%;
 
         display: flex;
 
@@ -370,6 +327,7 @@
         display: flex;
         // align-items: center;
         // justify-self: center;
+        align-items: center;
         justify-content: center;
 
         h3 {

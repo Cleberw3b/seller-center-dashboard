@@ -82,8 +82,6 @@ export function ProductEdit() {
   }, [totalFields]);
 
   const calcFilledFields = useCallback((data: Product) => {
-    console.log(data);
-
     let filled = 0;
 
     if (data.name)

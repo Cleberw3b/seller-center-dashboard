@@ -4,7 +4,7 @@ import styles from './styles.module.scss';
 
 interface MessageModalProps {
   handleVisibility: React.MouseEventHandler;
-  alterStyle: boolean;
+  alterStyle?: boolean;
 }
 
 const MessageModal: React.FC<MessageModalProps> = ({ handleVisibility, alterStyle, children }) => {

@@ -12,8 +12,6 @@ const Collapsible: React.FC<CollapsibleProps> = ({ totalItems, toggleRef, childr
 
   const checkHandle = useCallback((state: boolean) => {
     setIsChecked(state);
-
-    console.log(isChecked);
   }, []);
 
   return (
