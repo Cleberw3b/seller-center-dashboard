@@ -7,6 +7,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { useLoading } from 'src/hooks/loading';
 import { CompanyInfo, PersonInfo } from 'src/shared/types/personalInfo';
+import { useMemo } from 'react';
 
 export const ProfileButton: React.FC = () => {
   const { user, signOut } = useAuth();
@@ -15,15 +16,29 @@ export const ProfileButton: React.FC = () => {
 
   // console.log(signOut);
 
+  const userName = useMemo(() => {
+    if (!!user) {
+      if (user.userType === 'f') {
+        const personInfo = user.personalInfo as PersonInfo;
+        return personInfo.firstName
+      }
+
+      const companyInfo = user.personalInfo as CompanyInfo;
+      return companyInfo.name;
+    }
+
+    return ''
+  }, [user])
+
   return (
     <div className={!isLoading ? styles.profileContainer : styles.profileContainerDisabled}>
       <div className={styles.info}>
         {!!user && !!user.personalInfo ?
           (user.userType === 'f') ?
-            <span> Olá, {user.personalInfo.firstName} </span>
+            <span> Olá, {userName} </span>
             :
             (user.userType === 'j') &&
-            <span> Olá, {user.personalInfo.name} </span>
+            <span> Olá, {userName} </span>
           :
           !!user && <span style={{ fontSize: '0.75rem' }}> {user.email} </span>}
         {/* {user ? <img src={!user.avatar_url ? 'https://www.projetodraft.com/wp-content/uploads/2019/06/ozllo_logo.jpg' : user.avatar_url} alt={user.name} /> : <FiUser size={52} color='var(--grafite)' />} */}
